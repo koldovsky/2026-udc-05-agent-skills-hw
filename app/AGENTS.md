@@ -36,4 +36,12 @@ entry point is `src/index.ts`.
   changes there affect all widgets; keep its public API (`register`, `create`,
   `listWidgets`) stable.
 
-<!-- Task A adds a "## Skills" section here pointing at .agents/skills/ -->
+## Skills
+
+Available skills in `.agents/skills/`:
+
+| Skill | When to use |
+|-------|-------------|
+| `creating-widget` | When asked to add a new widget/component to the library. Encodes the golden path: factory file, colocated test, index import. |
+| `architecture-deep-dive` | When asked to explain the architecture, registry internals, or how widgets interact. *(TBD — Task B)* |
+| `analyzing-bundle-size` | When asked to check, reduce, or analyze the library's bundle size. *(TBD — Task C)* |
