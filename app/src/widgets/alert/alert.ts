@@ -19,6 +19,9 @@ function escapeHtml(value: string): string {
 }
 
 export function createAlert(props: AlertProps): string {
+  if (typeof props.message !== "string") {
+    throw new TypeError(`createAlert: "message" must be a string, got ${typeof props.message}`);
+  }
   const tone = props.tone && TONES.has(props.tone) ? props.tone : "info";
   return `<div class="alert alert--${tone}">${escapeHtml(props.message)}</div>`;
 }

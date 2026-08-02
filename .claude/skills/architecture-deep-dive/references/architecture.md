@@ -43,13 +43,12 @@ export function listWidgets(): string[] {
 }
 ```
 
-Three function exports — together with the exported `WidgetProps` type
-(imported by every widget module alongside `register`) — that is the entire
-public API. `WidgetFactory` is also exported but stays internal to
-`registry.ts`; no widget module imports it. Each widget instead exports its
-own `create<Name>` function (`createAlert`, `createBadge`, `createSpinner`)
-for direct import — used by that widget's own colocated test — while the
-package-level API callers reach for is `create()`:
+Three function exports plus two exported types, `WidgetProps` (imported by
+every widget module alongside `register`) and `WidgetFactory` (exported too,
+but no widget module actually imports it — each widget instead exports its
+own `create<Name>` function, e.g. `createBadge`, for its colocated test to
+import directly). Together these five exports are the entire surface of
+`registry.ts`:
 
 - **`register(name, factory)`** — stores a factory under a string name in a
   module-level `Map`. Throws if `name` is already taken — registration is
@@ -66,6 +65,12 @@ package-level API callers reach for is `create()`:
 The `widgets` Map itself is not exported — it's module-private state.
 That's the actual reason widgets *must* call `register()` at module load
 (see below): there is no other way to get a factory into the map.
+
+`registry.ts`'s own surface is not the same as the package-level API,
+though: `register` and the two types never leave the registry/widget layer.
+What callers outside actually get is narrower — just `create` and
+`listWidgets`, re-exported from `app/src/widgets/index.ts` and again from
+`app/src/index.ts` (see both below).
 
 **Do not change these three signatures.** Every widget module and
 `app/src/widgets/index.ts` depends on this exact shape; a signature change
