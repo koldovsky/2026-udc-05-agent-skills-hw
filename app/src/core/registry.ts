@@ -1,4 +1,4 @@
-// Tiny widget registry — the "architecture" a skill's references/ should document.
+
 export type WidgetProps = Record<string, unknown>;
 export type WidgetFactory<P extends WidgetProps = WidgetProps> = (props: P) => string;
 
