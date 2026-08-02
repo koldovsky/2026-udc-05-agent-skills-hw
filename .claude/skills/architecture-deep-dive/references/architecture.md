@@ -43,9 +43,13 @@ export function listWidgets(): string[] {
 }
 ```
 
-Three function exports — together with the two exported types (`WidgetProps`,
-`WidgetFactory`, imported by every widget module) that is the entire public
-API:
+Three function exports — together with the exported `WidgetProps` type
+(imported by every widget module alongside `register`) — that is the entire
+public API. `WidgetFactory` is also exported but stays internal to
+`registry.ts`; no widget module imports it. Each widget instead exports its
+own `create<Name>` function (`createAlert`, `createBadge`, `createSpinner`)
+for direct import — used by that widget's own colocated test — while the
+package-level API callers reach for is `create()`:
 
 - **`register(name, factory)`** — stores a factory under a string name in a
   module-level `Map`. Throws if `name` is already taken — registration is

@@ -141,7 +141,7 @@ answer outright, and the agent will say so instead of re-deriving it.
 | Tool calls before first write | **3** | **8** | **6** |
 | Files read before first write | **1** | **5** | **4** |
 | Named source of the structure | the skill | `app/AGENTS.md`, then `badge.ts` | `badge.ts` only |
-| Verification run unprompted | yes — all 4 `## Verify` steps | yes — own choice of 2 | yes — own choice of 3 |
+| Verification source | skill's `## Verify` steps | agent-selected | agent-selected |
 
 Artifact equality was checked, not eyeballed — and each arm's raw output is
 preserved in `docs/ab-runs/{a,b,c}/` so the check is re-derivable rather than

@@ -37,6 +37,7 @@ For a widget named `<name>` (kebab-case, e.g. `alert`, `spinner`):
      outside — without it the widget silently doesn't exist to the registry.
 
    Model it on the seeded example, `app/src/widgets/badge/badge.ts`:
+
    ```ts
    import { register, type WidgetProps } from "../../core/registry.js";
 
@@ -64,9 +65,9 @@ For a widget named `<name>` (kebab-case, e.g. `alert`, `spinner`):
 3. **Add `import "./<name>/<name>.js";` to `app/src/widgets/index.ts`.**
    This is easy to forget and the failure is silent: the widget file can be
    perfectly correct and its own test can pass, but `create("<name>", ...)`
-   will still throw "not registered" for every other caller (including the
-   bundle entry point) until this import exists, because `register()` only
-   runs when the module is actually loaded.
+   will still throw `Unknown widget "<name>". Registered: ...` for every
+   other caller (including the bundle entry point) until this import exists,
+   because `register()` only runs when the module is actually loaded.
 
 4. **Follow existing conventions:** TypeScript strict (no `any`, no
    `@ts-ignore`), named exports only (no default export), kebab-case
