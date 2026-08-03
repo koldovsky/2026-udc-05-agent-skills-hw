@@ -44,3 +44,9 @@ skill when the task fits its description.
 - **creating-widget** (`.agents/skills/creating-widget/`) — how to add a new
   widget: folder under `src/widgets/`, pure factory + `register()`, colocated
   test, import in `widgets/index.ts`.
+- **architecture-deep-dive** (`.agents/skills/architecture-deep-dive/`) —
+  explains registry contract, widget module boundaries, and entry points
+  (see `references/architecture.md`).
+- **analyzing-bundle-size** (`.agents/skills/analyzing-bundle-size/`) —
+  measures the real size of `dist/bundle.js` via
+  `scripts/measure-bundle-size.mjs` (runs `npm run build`, does not guess).

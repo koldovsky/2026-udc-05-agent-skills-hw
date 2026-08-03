@@ -104,7 +104,7 @@ export { create, listWidgets } from "./widgets/index.js";
 
 ### Data flow
 
-```
+```text
 import widgets/index
   → import badge.ts (and other widgets)
     → register("badge", createBadge)  // Map write
