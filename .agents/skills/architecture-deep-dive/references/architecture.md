@@ -51,8 +51,12 @@ Behaviour:
   missing; otherwise returns `factory(props)`.
 - `listWidgets` — returns `[...widgets.keys()]`.
 
-Nothing else is exported from this module. Do not add alternate registration
-APIs or change these signatures when implementing features.
+Nothing else is exported from this module at **runtime** beyond
+`register` / `create` / `listWidgets`. The types `WidgetProps` and
+`WidgetFactory` remain exported for widget authors (e.g. props interfaces
+that `extends WidgetProps`, as in `creating-widget`). Do not add alternate
+registration APIs or change these function signatures when implementing
+features.
 
 ### Why widgets live under `app/src/widgets/<name>/`
 

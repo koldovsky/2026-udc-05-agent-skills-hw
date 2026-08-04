@@ -13,4 +13,10 @@ describe("createSpinner", () => {
       '<span class="spinner spinner--lg" role="status" aria-label="Please wait"></span>',
     );
   });
+
+  it("escapes & and \" in aria-label", () => {
+    expect(createSpinner({ label: `A & "B"` })).toBe(
+      '<span class="spinner spinner--md" role="status" aria-label="A &amp; &quot;B&quot;"></span>',
+    );
+  });
 });

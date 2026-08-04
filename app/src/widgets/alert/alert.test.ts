@@ -13,4 +13,10 @@ describe("createAlert", () => {
       '<div class="alert alert--error">Danger</div>',
     );
   });
+
+  it("escapes HTML-special characters in message", () => {
+    expect(createAlert({ message: `<script>&"'` })).toBe(
+      '<div class="alert alert--info">&lt;script&gt;&amp;&quot;&#39;</div>',
+    );
+  });
 });
