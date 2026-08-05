@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { create } from "../../core/registry.js";
 import { createSpinner } from "./spinner.js";
 
 describe("createSpinner", () => {
@@ -17,6 +18,13 @@ describe("createSpinner", () => {
   it("escapes & and \" in aria-label", () => {
     expect(createSpinner({ label: `A & "B"` })).toBe(
       '<span class="spinner spinner--md" role="status" aria-label="A &amp; &quot;B&quot;"></span>',
+    );
+  });
+
+  it("throws TypeError when label passed through create is not a string", () => {
+    expect(() => create("spinner", { label: 42 })).toThrow(TypeError);
+    expect(() => create("spinner", { label: 42 })).toThrow(
+      'Spinner "label" must be a string',
     );
   });
 });

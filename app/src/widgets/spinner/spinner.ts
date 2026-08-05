@@ -14,6 +14,9 @@ export function createSpinner(props: SpinnerProps = {}): string {
     throw new TypeError('Spinner "size" must be one of "sm" | "md" | "lg"');
   }
   const label = props.label ?? "Loading";
+  if (typeof label !== "string") {
+    throw new TypeError('Spinner "label" must be a string');
+  }
   return `<span class="spinner spinner--${size}" role="status" aria-label="${escapeHtml(label)}"></span>`;
 }
 
