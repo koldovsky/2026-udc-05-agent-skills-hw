@@ -36,4 +36,6 @@ entry point is `src/index.ts`.
   changes there affect all widgets; keep its public API (`register`, `create`,
   `listWidgets`) stable.
 
-<!-- Task A adds a "## Skills" section here pointing at .agents/skills/ -->
+## Skills
+
+- [Creating Widget](../.agents/skills/creating-widget/SKILL.md) — add a new widget to the library.
