@@ -22,7 +22,8 @@ description: >-
 1. Read [`references/architecture.md`](references/architecture.md) before
    answering — it is the source of depth for this skill.
 2. Base every claim on that reference and the real files it cites
-   (`app/src/core/registry.ts`, `app/src/widgets/**`). Do not invent APIs.
+   (`app/src/core/registry.ts`, `app/src/widgets/**`, `app/src/index.ts`).
+   Do not invent APIs.
 3. Keep the answer specific to this library (widget registry + pure HTML
    factories), not a generic "clean architecture" essay.
 
