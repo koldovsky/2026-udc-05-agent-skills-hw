@@ -36,6 +36,7 @@ Baseline guidance for an Agentic IDE working in **this homework repo**.
   - `.agents/skills/analyzing-bundle-size/SKILL.md` + `scripts/*` — Task C
     (skill with scripts/)
   - `app/AGENTS.md` — gets a "## Skills" section (Task A)
+  - `docs/task-a-verification.md` — Task A step-5 check (skill triggers unprompted)
   - `docs/ab-validation.md` — Task D A/B write-up
   - `docs/task-e-bonus.md` — Task E (bonus, pick one path)
   - `.claude/skills/` — optional cross-tool mirror (Task E, path 1)
@@ -63,3 +64,25 @@ Before opening a PR: `cd app && npm test` is green, all three
 `.agents/skills/**/SKILL.md` have real frontmatter + concrete instructions
 (not the raw template), `app/AGENTS.md` has a "## Skills" section, and
 `docs/ab-validation.md` shows a real, specific difference (not placeholders).
+
+# Language and Communication Rules
+
+## Assistant responses
+- Always respond to the user in Ukrainian.
+- Keep responses simple, clear, concise, and easy to understand for non-developer.
+- Do not switch to English unless the user explicitly asks for English.
+- Use English for technical terms when that is standard in programming, but explain them in Ukrainian when necessary.
+
+## Project files and documentation
+- All source code comments must be written in English.
+- All documentation must be written in English.
+- All README files must be written in English.
+- All documentation files, specifications, technical notes, and project-related written content must be written in English.
+- Commit messages must be written in English.
+- Code identifiers, variable names, function names, class names, and other code-related names must be in English.
+
+## Important
+- The language of communication with the user is Ukrainian.
+- The language of project artifacts is English.
+- When explaining changes to the user, explain them in Ukrainian.
+- When creating or modifying files in the repository, use English unless the user explicitly requests another language.

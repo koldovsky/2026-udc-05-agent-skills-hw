@@ -1,0 +1,20 @@
+import { describe, expect, it } from "vitest";
+import { createSpinner } from "./spinner.js";
+
+describe("createSpinner", () => {
+  it("defaults to the md size and the Loading label", () => {
+    expect(createSpinner({})).toBe(
+      '<span class="spinner spinner--md" role="status" aria-label="Loading"></span>',
+    );
+  });
+
+  it("is callable with no argument at all", () => {
+    expect(createSpinner()).toBe(createSpinner({}));
+  });
+
+  it("respects an explicit size and label", () => {
+    expect(createSpinner({ size: "lg", label: "Uploading" })).toBe(
+      '<span class="spinner spinner--lg" role="status" aria-label="Uploading"></span>',
+    );
+  });
+});
