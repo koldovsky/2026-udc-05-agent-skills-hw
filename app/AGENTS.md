@@ -36,4 +36,20 @@ entry point is `src/index.ts`.
   changes there affect all widgets; keep its public API (`register`, `create`,
   `listWidgets`) stable.
 
-<!-- Task A adds a "## Skills" section here pointing at .agents/skills/ -->
+## Skills
+
+Project skills live in `.agents/skills/` (repo root, one level above this
+file). Load the one that matches the task instead of improvising:
+
+| Skill | Use it when | Extras |
+|---|---|---|
+| [`creating-widget`](../.agents/skills/creating-widget/SKILL.md) | Adding or reviewing a widget in `src/widgets/` — encodes the golden path: pure factory → `register()` → colocated test → wiring import in `src/widgets/index.ts`. | instructions only |
+| [`architecture-deep-dive`](../.agents/skills/architecture-deep-dive/SKILL.md) | Explaining how the registry works, or deciding which layer (`core/` vs `widgets/`) a change belongs in. | `references/architecture.md` |
+| [`analyzing-bundle-size`](../.agents/skills/analyzing-bundle-size/SKILL.md) | Reporting the size of `dist/bundle.js` or the cost of a change — runs the real build, never estimates. | `scripts/bundle-size.mjs` |
+
+`.agents/skills/` is the portable source of truth. `creating-widget` is also
+mirrored, unmodified, to `.claude/skills/creating-widget/` — tools that only
+auto-discover their own path do not see `.agents/skills/` otherwise
+(measured in [`docs/ab-validation.md`](../docs/ab-validation.md)). If you edit
+one copy, edit both.
+
