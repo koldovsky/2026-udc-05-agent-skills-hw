@@ -1,0 +1,4 @@
+interface:
+  display_name: "Architecture Deep Dive"
+  short_description: "Explain widget-registry architecture"
+  default_prompt: "Use $architecture-deep-dive to explain the widget-registry architecture."

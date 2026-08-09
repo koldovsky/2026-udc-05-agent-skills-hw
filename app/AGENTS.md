@@ -37,3 +37,15 @@ entry point is `src/index.ts`.
   `listWidgets`) stable.
 
 <!-- Task A adds a "## Skills" section here pointing at .agents/skills/ -->
+
+## Skills
+
+- `.agents/skills/creating-widget/SKILL.md` — use when adding a new widget to
+  follow the canonical `src/widgets/<name>/<name>.ts` + colocated test +
+  `widgets/index.ts` import pattern.
+- `.agents/skills/architecture-deep-dive/SKILL.md` — use when explaining the
+  widget-registry architecture or deciding where a feature belongs; detailed
+  context lives in its `references/architecture.md`.
+- `.agents/skills/analyzing-bundle-size/SKILL.md` — use when checking current
+  bundle size or the bundle-size impact of a change; it should run the real
+  build and inspect `dist/bundle.js`.

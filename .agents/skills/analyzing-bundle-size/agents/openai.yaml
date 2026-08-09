@@ -1,0 +1,4 @@
+interface:
+  display_name: "Analyze Bundle Size"
+  short_description: "Build and report bundle byte size"
+  default_prompt: "Use $analyzing-bundle-size to report the current app bundle size."
