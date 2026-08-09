@@ -13,8 +13,8 @@
 
 import { execFileSync } from "node:child_process";
 import { gzipSync } from "node:zlib";
-import { readFileSync, statSync } from "node:fs";
-import { fileURLToPath } from "node:url";
+import { existsSync, readFileSync, statSync } from "node:fs";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import path from "node:path";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
@@ -33,15 +33,23 @@ function fail(message) {
 }
 
 if (!skipBuild) {
+  // Distinguish "deps not installed" from a genuine build failure, so a
+  // TypeScript/esbuild error is never reported as a missing `npm install`.
+  if (!existsSync(path.join(appDir, "node_modules"))) {
+    fail(`${path.relative(repoRoot, appDir)}/node_modules is missing — run \`cd app && npm install\` first.`);
+  }
   try {
-    // npm is a shell script on Windows -> shell: true; inherit so build errors are visible.
+    // npm is a shell script on Windows -> shell: true.
+    // In --json mode stdout is silenced so the JSON stays parseable, but stderr
+    // is kept: build diagnostics must never be swallowed.
     execFileSync("npm", ["run", "build"], {
       cwd: appDir,
-      stdio: asJson ? "ignore" : "inherit",
+      stdio: asJson ? ["ignore", "ignore", "inherit"] : "inherit",
       shell: process.platform === "win32",
     });
-  } catch {
-    fail(`\`npm run build\` failed in ${appDir}. Run \`cd app && npm install\` first, then retry.`);
+  } catch (error) {
+    const status = typeof error?.status === "number" ? ` (exit code ${error.status})` : "";
+    fail(`\`npm run build\` failed in ${appDir}${status} — see the build diagnostics above.`);
   }
 }
 
@@ -55,11 +63,20 @@ try {
 const source = readFileSync(bundlePath);
 const gzipBytes = gzipSync(source, { level: 9 }).byteLength;
 
-// Which widgets are actually in the bundle (they are eagerly imported via
-// src/widgets/index.ts, so every registered widget ships).
-const widgetNames = [...source.toString("utf8").matchAll(/["'`]([a-z][a-z0-9-]*)["'`]\s*,\s*[A-Za-z_$][\w$]*\s*\)/g)]
-  .map((m) => m[1]);
-const registered = [...new Set(widgetNames)];
+// Which widgets actually ship in the bundle. Rather than pattern-matching the
+// minified source (esbuild renames `register` to a single letter, so any regex
+// is guesswork), import the bundle and ask the registry itself — every widget
+// is eagerly imported via src/widgets/index.ts, so loading the module runs all
+// register() calls. Sorted for a stable diff between runs.
+let registered = [];
+try {
+  const bundle = await import(pathToFileURL(bundlePath).href);
+  if (typeof bundle.listWidgets === "function") {
+    registered = [...bundle.listWidgets()].sort();
+  }
+} catch (error) {
+  console.error(`bundle-size: could not read the widget list from the bundle (${error.message})`);
+}
 
 if (asJson) {
   console.log(JSON.stringify({ file: "app/dist/bundle.js", bytes, gzipBytes, registered }, null, 2));

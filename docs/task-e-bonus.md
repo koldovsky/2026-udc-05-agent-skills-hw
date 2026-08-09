@@ -1,34 +1,57 @@
 # Task E (bonus) — Path 1: cross-tool portability check
 
-**Skill under test:** `creating-widget`, copied **byte-for-byte** (no edits) from
-`.agents/skills/creating-widget/SKILL.md` to `.claude/skills/creating-widget/SKILL.md`.
-**Prompt (identical in both):** the `alert` widget ticket from `materials/ab-task.md`.
+**Skill under test:** `creating-widget` — the same `SKILL.md`, **unmodified**,
+in both tools (`.agents/skills/creating-widget/SKILL.md`; Claude Code also has
+the byte-identical mirror at `.claude/skills/creating-widget/SKILL.md`).
 
-## Honest scope note
+**Tools compared:** Claude Code (Opus 5 → fresh Sonnet sub-agent, empty
+context) and **Codex CLI 0.144.1** (`codex exec --full-auto`, separate
+process, no shared context).
 
-Both runs were executed by Claude Code (fresh sub-agent, empty context). So
-this compares **two discovery conventions within one tool family** — the
-cross-tool `.agents/skills/` path versus the tool-native `.claude/skills/`
-path — not two vendors. That turned out to be the more interesting axis
-anyway, because it is where the skill actually failed.
+**Prompt (identical in both, verbatim):**
+"Add a `spinner` widget following the project's pattern. When done, report
+which files you created or modified, which verification commands you ran, and
+whether any project skill was available/used (name it and say what it made you
+do differently)."
 
-| | Discovery via `.agents/skills/` only | Discovery via `.claude/skills/` mirror |
+Each run started from the same clean tree (no `spinner`, `widgets/index.ts` at
+HEAD); the first run was reverted before the second.
+
+| | Tool 1 — Claude Code | Tool 2 — Codex CLI |
 |---|---|---|
-| Skill discovered/loaded? | **no** — agent later confirmed it never opened `SKILL.md` | **yes** — agent cited `creating-widget` by name |
-| Followed the golden path? | yes, but by re-deriving it from `badge/` and `app/AGENTS.md` | yes, and cited the skill for each rule |
-| Followed skill-only conventions? | no — alphabetical import ordering in `widgets/index.ts` was missed | yes |
-| Ran the skill's `## Verify` routine? | no (`npm test` only) | yes (test, typecheck, 3 greps, isolated vitest) |
-| File content changes needed | **none** | **none** |
-| Discrepancies | pointer from `app/AGENTS.md` was not enough to trigger a read | — |
+| Skill discovered/loaded? | yes — named `creating-widget` unprompted | yes — named `creating-widget` unprompted |
+| File edits needed to the skill | **none** | **none** |
+| Followed the golden path? | yes: `app/src/widgets/spinner/spinner.ts`, pure `createSpinner`, `register("spinner", …)` at module bottom, colocated `spinner.test.ts`, wiring import in `widgets/index.ts` | yes: identical structure, same four touchpoints |
+| Alphabetical wiring import (skill-only rule) | yes | yes |
+| Ran the skill's `## Verify` block | `npm test` (6/6), `npm run typecheck`, all 3 greps, `npm test -- src/widgets/spinner` | `npm test` (6/6), `npm run typecheck`, `npm test -- src/widgets/spinner`, registry/wiring/no-default-export checks, `git diff --check` |
+| Discrepancies | invented a required `label` prop and `"sm" \| "md" \| "lg"` sizes | no `label`, hardcoded `"Loading"` text, `"small" \| "medium" \| "large"` sizes |
+| Environment quirk | none | had to call `npm.cmd` — PowerShell blocks the `npm.ps1` shim |
 
-## Conclusion
+The only divergence is in details the skill deliberately does **not** specify
+(a spinner's prop vocabulary is a product decision, not a project convention).
+Everything the skill *does* specify — layout, purity, registration, colocated
+test, alphabetical wiring, the verification routine — came out the same in both
+tools.
 
-The skill file itself is genuinely portable: the same `SKILL.md`, with the same
-YAML frontmatter and no tool-specific syntax, worked unmodified from the
-`.claude/skills/` location. What is **not** portable is discovery — placing a
-skill only under the cross-tool `.agents/skills/` path left it invisible to
-this tool, and a markdown link to it from `app/AGENTS.md` was not enough to
-make an agent read it. Keeping both locations (the portable source plus a
-tool-native copy) costs one `cp` and is the difference between a skill that
-fires and a skill that is decoration. Ideally the mirror is a symlink or a
-CI-checked copy, so the two cannot drift apart.
+## A caveat on discovery, which is the non-portable part
+
+The skill *file* needed no adaptation, but reaching it is not uniform:
+
+- Claude Code ignored the cross-tool `.agents/skills/` path in an earlier
+  measured run and only loaded the skill once the `.claude/skills/` mirror
+  existed — see `docs/ab-validation.md`, round 1 vs round 2.
+- Codex CLI has no `.claude/skills/` convention at all and still found and
+  applied the skill in this run, with the `## Skills` table in `app/AGENTS.md`
+  and the repo-root `AGENTS.md` as the pointers.
+
+**Conclusion:** the skill is genuinely portable as a *document* — one
+`SKILL.md` with plain YAML frontmatter drove two independent tools to the same
+implementation and the same verification steps, with zero tool-specific edits.
+What is not portable is *discovery*: each tool looks in its own place, so the
+practical recipe is to keep `.agents/skills/` as the source of truth, mirror it
+into the tool-native directory, and keep an explicit pointer in `AGENTS.md` for
+tools that read that instead. A skill nobody loads is worth exactly nothing.
+
+> The `spinner` widget from both runs was reverted after the comparison — the
+> deliverable here is this write-up, and the repo keeps only the `alert` widget
+> from Task D. `cd app && npm test` is green (4/4).

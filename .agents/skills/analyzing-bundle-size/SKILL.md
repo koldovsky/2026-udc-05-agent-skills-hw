@@ -25,7 +25,8 @@ node .agents/skills/analyzing-bundle-size/scripts/bundle-size.mjs
 
 It runs `npm run build` in `app/` (esbuild → `app/dist/bundle.js`), then reads
 the real file: raw minified bytes, gzipped bytes (`zlib` level 9), and the
-widget names found in the bundle. Flags:
+widgets that actually ship — obtained by importing the built bundle and calling
+its own `listWidgets()`, not by pattern-matching minified source. Flags:
 
 - `--json` — machine-readable output (`{ file, bytes, gzipBytes, registered }`),
   useful when you need to diff two runs.
@@ -33,8 +34,10 @@ widget names found in the bundle. Flags:
   Only use it when you know the bundle is current; otherwise you will report a
   stale number.
 
-Prerequisite: `cd app && npm install` must have been run once (the script
-fails with that instruction if esbuild is missing).
+Prerequisite: `cd app && npm install` must have been run once — the script
+checks for `app/node_modules` and says so explicitly. A build that fails for
+any other reason (TypeScript/esbuild error) is reported as a build failure with
+its diagnostics on stderr, including in `--json` mode, and exits `1`.
 
 **For a before/after comparison**, run the script on the baseline first, save
 the number, apply the change, run it again, and report both plus the delta —
@@ -48,8 +51,13 @@ so there is no tree-shaking: every registered widget ships to every consumer.
 
 - The script printed a number it read from disk, and
   `ls -l app/dist/bundle.js` (or `stat`) agrees with it.
-- The build actually ran: the output starts with esbuild's own
-  `dist/bundle.js — <n> bytes` line from `app/scripts/build.mjs`.
+- The build actually ran. In the default (human-readable) mode, npm's own
+  banner and esbuild's `dist/bundle.js — <n> bytes` line from
+  `app/scripts/build.mjs` appear somewhere in the output — npm may print
+  its own lines first, so look for the line, don't expect it first. In
+  `--json` mode that output is silenced by design: verify instead that the
+  exit code is `0`, `file` is `app/dist/bundle.js`, and `bytes` matches the
+  file on disk.
 - Baseline sanity check: with `badge` + `alert` registered (current `main`)
   the bundle is ≈ 509 bytes raw / ≈ 310 gzipped; with `badge` alone it was
   411 / 278 — i.e. one small widget costs ≈ 98 bytes. A figure far outside

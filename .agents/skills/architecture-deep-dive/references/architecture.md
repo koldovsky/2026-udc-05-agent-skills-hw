@@ -39,7 +39,9 @@ Properties that matter and that a generic "plugin registry" answer gets wrong:
   (`import { createBadge } from "./badge.js"`) instead of going through
   `create()`.
 - **`create` throws for unknown names**, and the message enumerates what *is*
-  registered: `Unknown widget "x". Registered: badge`. That error string is
+  registered: with the current tree that reads `Unknown widget "x".
+  Registered: alert, badge` (the list follows registration order, i.e. import
+  order in `app/src/widgets/index.ts`). That error string is
   the fastest diagnostic for the most common bug in this repo — a widget file
   that exists but was never imported (see "Load order" below).
 - **The generic on `register` is erased at the boundary**: the factory is
@@ -54,7 +56,7 @@ Properties that matter and that a generic "plugin registry" answer gets wrong:
 
 ### Module boundaries
 
-```
+```text
 app/src/index.ts            → re-exports { create, listWidgets }   (bundle entry point)
 app/src/widgets/index.ts    → imports every widget for side effects, re-exports the registry API
 app/src/widgets/<name>/     → <name>.ts (factory + register call) + <name>.test.ts
@@ -68,9 +70,10 @@ registry reusable and what makes "where does this go?" answerable:
 - Logic that all widgets need (registration, lookup, error messages) → `core/`.
 - Anything that knows a specific widget's markup, props, or tone vocabulary →
   `widgets/<name>/`. Note that the `"info" | "warn" | "error"` tone union is
-  declared per-widget in `badge.ts`, *not* shared in `core/` — deliberately:
-  `core/` stays free of presentational vocabulary. A second widget with tones
-  duplicates the union rather than importing it from `badge`.
+  declared per-widget in `badge.ts` and again in `alert.ts`, *not* shared in
+  `core/` — deliberately: `core/` stays free of presentational vocabulary. A
+  widget with tones duplicates the union rather than importing it from another
+  widget, which is what keeps widgets independent of one another.
 - Changes to `register`/`create`/`listWidgets` signatures are off-limits
   (`AGENTS.md` guardrail) — every widget depends on them.
 
@@ -81,16 +84,22 @@ Registration happens as a **side effect of module evaluation** — the
 when something imports that module. Nothing scans the filesystem. So the chain
 is:
 
-```
-consumer → app/src/index.ts → app/src/widgets/index.ts → import "./badge/badge.js" → register("badge", …)
+```text
+consumer → app/src/index.ts → app/src/widgets/index.ts → import "./alert/alert.js" → register("alert", …)
+                                                       → import "./badge/badge.js" → register("badge", …)
 ```
 
 `app/src/widgets/index.ts` exists purely to be that side-effect root:
 
 ```ts
+import "./alert/alert.js";
 import "./badge/badge.js";
+
 export { listWidgets, create } from "../core/registry.js";
 ```
+
+(the import list is kept alphabetical — see
+`.agents/skills/creating-widget/SKILL.md`)
 
 Consequences:
 
@@ -117,11 +126,27 @@ Consequences:
   separate `tests/` tree and **no linter configured** — `npm run typecheck`
   (`tsc --noEmit`) is the static-analysis surface.
 
+### Output contract: raw HTML, no escaping
+
+Every factory interpolates its props straight into a template literal —
+`badge.ts` does it with `props.label`, `alert.ts` with `props.message`. Nothing
+in this library escapes anything, and `platform: "neutral"` rules out reaching
+for the DOM (`textContent`) to do it. So the trust boundary sits **outside**
+the library: the string returned by `create()` is safe to inject only if the
+props came from a trusted source. A consumer that renders user input must
+escape before calling `create()`, or sanitise the returned string.
+
+This is a deliberate property of the seeded design, not an oversight in one
+widget — changing it means changing every factory plus the `WidgetFactory`
+contract, and would break the "mirror `badge`" pattern that the whole widget
+library is built on. If escaping is ever wanted, the right place is a shared
+helper in `core/` applied by every factory, introduced in one change.
+
 ### Common pitfalls
 
 | Symptom | Cause |
 |---|---|
-| `Unknown widget "x". Registered: badge` | missing `import "./x/x.js";` in `app/src/widgets/index.ts` |
+| `Unknown widget "x". Registered: alert, badge` | missing `import "./x/x.js";` in `app/src/widgets/index.ts` |
 | `Widget "x" is already registered` (at load) | the module got imported under two specifiers, or `register` was called twice |
 | `tsc` error on the props interface | props interface doesn't `extends WidgetProps` |
 | Module not found at runtime | `.js` extension omitted from a relative import |

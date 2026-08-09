@@ -53,6 +53,12 @@ every new widget mirrors it exactly. Substitute `<name>` (kebab-case) and
      `WidgetProps`.
    - Optional props get their default via `??` inside the factory, mirroring
      `badge`'s `tone` handling.
+   - Props are interpolated into the HTML **unescaped**, exactly like `badge` —
+     the library's trust boundary is the caller (see
+     `.agents/skills/architecture-deep-dive/references/architecture.md`,
+     "Output contract"). Do not add per-widget escaping: it would diverge from
+     every other widget. If escaping is genuinely needed, raise it as a
+     `core/`-wide change instead.
 
 2. **Create the colocated test** — `app/src/widgets/<name>/<name>.test.ts`,
    mirroring `badge.test.ts`: one case for the default of each optional prop,
@@ -84,10 +90,11 @@ grep -n '<name>' app/src/widgets/index.ts               # the wiring import exis
 grep -rn 'export default' app/src/widgets/<name>/       # must return nothing
 ```
 
-A quick runtime sanity check that the widget is actually reachable by string ID:
+A quick sanity check that only the new widget's tests run and pass — via the
+project's own script, so no unpinned `npx` download can slip in:
 
 ```bash
-cd app && npx vitest run src/widgets/<name>
+cd app && npm test -- src/widgets/<name>
 ```
 
 Note: there is no linter configured in this project — say so rather than
