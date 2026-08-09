@@ -1,0 +1,14 @@
+Fisher exact, two-sided, on pre-specified behaviour rows:
+  verify_loose      N 5/5 vs Z 0/5   p = 0.0079
+  verify_loose      P 5/5 vs Z 0/5   p = 0.0079
+  verify_loose      N 5/5 vs P 5/5   p = 1.0000
+  ran_verify_block  N 4/5 vs Z 0/5   p = 0.0476
+  ran_verify_block  P 5/5 vs Z 0/5   p = 0.0079
+  ran_verify_block  N 4/5 vs P 5/5   p = 1.0000
+  runtime_check     N 5/5 vs Z 1/5   p = 0.0476
+  runtime_check     P 5/5 vs Z 1/5   p = 0.0476
+  runtime_check     N 5/5 vs P 5/5   p = 1.0000
+
+Mann-Whitney U, exact, two-sided — cost of the two discovery paths:
+  turns  N [12, 13, 14, 14, 16] vs P [14, 17, 17, 18, 18]   U = 2.0, p = 0.0317
+  s      N [35, 36, 36, 37, 54] vs P [50, 53, 55, 56, 60]   U = 2.0, p = 0.0317

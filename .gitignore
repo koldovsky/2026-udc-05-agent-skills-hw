@@ -32,6 +32,10 @@ yarn-error.log*
 # Windows Git Bash safety: prevent accidental NUL device files
 nul
 
+# Python bytecode from the Task D / Task E graders
+__pycache__/
+*.py[cod]
+
 # Local agent state (settings, worktrees) — but DO commit .claude/skills/,
 # it's the optional cross-tool skill mirror from Task E.
 .claude/*

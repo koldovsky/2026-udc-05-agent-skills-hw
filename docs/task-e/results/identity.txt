@@ -1,0 +1,2 @@
+be7857996b82a93f63c4cde7889c6c2c59ae1571ee3299d649a9e0f245d0552d  runP/.agents/skills/creating-widget/SKILL.md
+be7857996b82a93f63c4cde7889c6c2c59ae1571ee3299d649a9e0f245d0552d  runN/.claude/skills/creating-widget/SKILL.md

@@ -1,0 +1,15 @@
+===== probeP  turns=1 s=12
+  Skill tool call for creating-widget : False
+  read SKILL.md instead               : False
+  tool calls                          : none
+  answer: Skills in session (23): **Repo/discovery** - `find-skills` — find + install new skills **Caveman plugin** - `caveman:cavecrew` — when to spawn caveman subagents - `caveman:caveman` — compressed talk mode - `caveman:caveman-commit` — commit messages - `caveman:caveman-compress` — compress memory files - `caveman:caveman-help` — mode cheat sheet - `caveman:caveman-review` — compressed PR comments - `caveman:caveman-stats` — token usage **Visual/artifact** - `dataviz` — charts, dashboards - `artifact-design` — artifact page design - `artifact-diagramming` — artifact diagrams - `artifact-capabilit
+===== probeN  turns=3 s=14
+  Skill tool call for creating-widget : True
+  read SKILL.md instead               : False
+  tool calls                          : ['Skill']
+  answer: Skill loaded. Stopping per instruction — no widget name given yet. Gist of `creating-widget` golden path (three files, skip #3 = `Unknown widget` throw): 1. `app/src/widgets/<name>/<name>.ts` — props iface extends `WidgetProps`, pure factory returns HTML string, top-level `register("<name>", createX)`. 2. `app/src/widgets/<name>/<name>.test.ts` — colocated vitest, exact-string asserts. 3. `app/src/widgets/index.ts` — side-effect import `import "./<name>/<name>.js";`. Give widget name + props, me build.
+===== probeZ  turns=1 s=9
+  Skill tool call for creating-widget : False
+  read SKILL.md instead               : False
+  tool calls                          : none
+  answer: Skills this session: **Core** - `find-skills` — discover/install skills - `dataviz` — charts/graphs/dashboards - `artifact-design`, `artifact-diagramming`, `artifact-capabilities` — Artifact pages - `update-config` — settings.json, hooks, permissions - `keybindings-help` — keyboard shortcuts - `code-review`, `simplify`, `security-review` — review/cleanup - `fewer-permission-prompts` — allowlist gen - `loop`, `schedule` — recurring/cron runs - `claude-api` — Claude API reference - `run` — launch project app - `init` — make CLAUDE.md **caveman plugin** - `caveman:cavecrew` — subagent delegation 

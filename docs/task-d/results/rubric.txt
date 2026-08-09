@@ -1,0 +1,100 @@
+
+===== runA  15/15 =====
+  PASS  1 file at widgets/alert/alert.ts
+  PASS  2 colocated alert.test.ts
+  PASS  3 top-level register("alert", ...)
+  PASS  4 wired into widgets/index.ts
+  PASS  5 .js on every relative import
+  PASS  6 named export, no default
+  PASS  7 no any
+  PASS  8 AlertProps extends WidgetProps
+  PASS  9 tone union + default info
+  PASS  10 exact markup
+  PASS  11 core/registry.ts untouched
+  PASS  12 npm test green
+  PASS  13 typecheck clean
+  PASS  14 runtime create() exact HTML
+  PASS  15 listWidgets() contains alert
+  · tracked files touched: app/src/widgets/index.ts
+  · npm test: Test Files  3 passed (3) |       Tests  7 passed (7) |    Start at  19:44:15 |    Duration  298ms (transform 56ms, setup 0ms, collect 65ms, tests 4ms, environment 0ms, prepare 149ms)
+  · runtime: ["alert","badge","spinner"] | <div class="alert alert--info">Saved</div> | <div class="alert alert--warn">Saved</div>
+
+===== runB  15/15 =====
+  PASS  1 file at widgets/alert/alert.ts
+  PASS  2 colocated alert.test.ts
+  PASS  3 top-level register("alert", ...)
+  PASS  4 wired into widgets/index.ts
+  PASS  5 .js on every relative import
+  PASS  6 named export, no default
+  PASS  7 no any
+  PASS  8 AlertProps extends WidgetProps
+  PASS  9 tone union + default info
+  PASS  10 exact markup
+  PASS  11 core/registry.ts untouched
+  PASS  12 npm test green
+  PASS  13 typecheck clean
+  PASS  14 runtime create() exact HTML
+  PASS  15 listWidgets() contains alert
+  · tracked files touched: app/src/widgets/index.ts
+  · npm test: Test Files  3 passed (3) |       Tests  7 passed (7) |    Start at  19:44:16 |    Duration  288ms (transform 49ms, setup 0ms, collect 66ms, tests 4ms, environment 2ms, prepare 166ms)
+  · runtime: ["alert","badge","spinner"] | <div class="alert alert--info">Saved</div> | <div class="alert alert--warn">Saved</div>
+
+===== runC  15/15 =====
+  PASS  1 file at widgets/alert/alert.ts
+  PASS  2 colocated alert.test.ts
+  PASS  3 top-level register("alert", ...)
+  PASS  4 wired into widgets/index.ts
+  PASS  5 .js on every relative import
+  PASS  6 named export, no default
+  PASS  7 no any
+  PASS  8 AlertProps extends WidgetProps
+  PASS  9 tone union + default info
+  PASS  10 exact markup
+  PASS  11 core/registry.ts untouched
+  PASS  12 npm test green
+  PASS  13 typecheck clean
+  PASS  14 runtime create() exact HTML
+  PASS  15 listWidgets() contains alert
+  · tracked files touched: app/src/widgets/index.ts
+  · npm test: Test Files  3 passed (3) |       Tests  7 passed (7) |    Start at  19:44:17 |    Duration  311ms (transform 49ms, setup 0ms, collect 57ms, tests 4ms, environment 0ms, prepare 116ms)
+  · runtime: ["alert","badge","spinner"] | <div class="alert alert--info">Saved</div> | <div class="alert alert--warn">Saved</div>
+
+===== runD  15/15 =====
+  PASS  1 file at widgets/alert/alert.ts
+  PASS  2 colocated alert.test.ts
+  PASS  3 top-level register("alert", ...)
+  PASS  4 wired into widgets/index.ts
+  PASS  5 .js on every relative import
+  PASS  6 named export, no default
+  PASS  7 no any
+  PASS  8 AlertProps extends WidgetProps
+  PASS  9 tone union + default info
+  PASS  10 exact markup
+  PASS  11 core/registry.ts untouched
+  PASS  12 npm test green
+  PASS  13 typecheck clean
+  PASS  14 runtime create() exact HTML
+  PASS  15 listWidgets() contains alert
+  · tracked files touched: app/src/widgets/index.ts
+  · npm test: Test Files  3 passed (3) |       Tests  7 passed (7) |    Start at  19:44:19 |    Duration  300ms (transform 53ms, setup 0ms, collect 66ms, tests 4ms, environment 0ms, prepare 120ms)
+  · runtime: ["alert","badge","spinner"] | <div class="alert alert--info">Saved</div> | <div class="alert alert--warn">Saved</div>
+
+===== runE  15/15 =====
+  PASS  1 file at widgets/alert/alert.ts
+  PASS  2 colocated alert.test.ts
+  PASS  3 top-level register("alert", ...)
+  PASS  4 wired into widgets/index.ts
+  PASS  5 .js on every relative import
+  PASS  6 named export, no default
+  PASS  7 no any
+  PASS  8 AlertProps extends WidgetProps
+  PASS  9 tone union + default info
+  PASS  10 exact markup
+  PASS  11 core/registry.ts untouched
+  PASS  12 npm test green
+  PASS  13 typecheck clean
+  PASS  14 runtime create() exact HTML
+  PASS  15 listWidgets() contains alert
+  · tracked files touched: app/src/widgets/index.ts
+  · npm test: Test Files  3 passed (3) |       Tests  7 passed (7) |    Start at  19:44:20 |    Duration  288ms (transform 62ms, setup 0ms, collect 71ms, tests 4ms, environment 0ms, prepare 146ms)
+  · runtime: ["alert","badge","spinner"] | <div class="alert alert--info">Saved</div> | <div class="alert alert--warn">Saved</div>
