@@ -68,15 +68,18 @@ const gzipBytes = gzipSync(source, { level: 9 }).byteLength;
 // is guesswork), import the bundle and ask the registry itself — every widget
 // is eagerly imported via src/widgets/index.ts, so loading the module runs all
 // register() calls. Sorted for a stable diff between runs.
-let registered = [];
+// An empty list here would be a silently wrong report (especially in --json),
+// so a failed import or a missing export is a hard error, not a warning.
+let bundle;
 try {
-  const bundle = await import(pathToFileURL(bundlePath).href);
-  if (typeof bundle.listWidgets === "function") {
-    registered = [...bundle.listWidgets()].sort();
-  }
+  bundle = await import(pathToFileURL(bundlePath).href);
 } catch (error) {
-  console.error(`bundle-size: could not read the widget list from the bundle (${error.message})`);
+  fail(`could not import ${path.relative(repoRoot, bundlePath)} to read its widget list — ${error.message}`);
 }
+if (typeof bundle.listWidgets !== "function") {
+  fail(`${path.relative(repoRoot, bundlePath)} does not export listWidgets() — the bundle entry point changed?`);
+}
+const registered = [...bundle.listWidgets()].sort();
 
 if (asJson) {
   console.log(JSON.stringify({ file: "app/dist/bundle.js", bytes, gzipBytes, registered }, null, 2));

@@ -37,7 +37,9 @@ its own `listWidgets()`, not by pattern-matching minified source. Flags:
 Prerequisite: `cd app && npm install` must have been run once — the script
 checks for `app/node_modules` and says so explicitly. A build that fails for
 any other reason (TypeScript/esbuild error) is reported as a build failure with
-its diagnostics on stderr, including in `--json` mode, and exits `1`.
+its diagnostics on stderr, including in `--json` mode, and exits `1`. The same
+applies if the bundle cannot be imported or no longer exports `listWidgets()` —
+the script exits `1` rather than printing a report with an empty widget list.
 
 **For a before/after comparison**, run the script on the baseline first, save
 the number, apply the change, run it again, and report both plus the delta —
