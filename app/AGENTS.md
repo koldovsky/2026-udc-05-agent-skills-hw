@@ -39,3 +39,5 @@ entry point is `src/index.ts`.
 ## Skills
 
 - [Creating Widget](../.agents/skills/creating-widget/SKILL.md) — add a new widget to the library.
+- [Architecture Deep Dive](../.agents/skills/architecture-deep-dive/SKILL.md) — deep dive into the architecture of the library.
+- [Analyzing Bundle Size](../.agents/skills/analyzing-bundle-size/SKILL.md) — analyze the bundle size of the library.
