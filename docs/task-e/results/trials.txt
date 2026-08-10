@@ -1,0 +1,21 @@
+trial             turns              s  loaded_via_sk  read_skill_md  ran_verify_bl   verify_loose  runtime_check          wired     runtime_ok            src         src_ws        test_ws
+N_t1                 12             35           True          False           True           True           True           True           True   77c0bc63ca7a   3cb67677a5c4   98490dee4073
+N_t2                 14             37           True          False          False           True           True           True           True   77c0bc63ca7a   3cb67677a5c4   da77ce0094c1
+N_t3                 13             36           True          False           True           True           True           True           True   77c0bc63ca7a   3cb67677a5c4   98490dee4073
+N_t4                 16             54           True          False           True           True           True           True           True   77c0bc63ca7a   3cb67677a5c4   98490dee4073
+N_t5                 14             36           True          False           True           True           True           True           True   77c0bc63ca7a   3cb67677a5c4   da77ce0094c1
+P_t1                 17             53          False           True           True           True           True           True           True   77c0bc63ca7a   3cb67677a5c4   98490dee4073
+P_t2                 17             55          False           True           True           True           True           True           True   77c0bc63ca7a   3cb67677a5c4   da77ce0094c1
+P_t3                 18             60          False           True           True           True           True           True           True   77c0bc63ca7a   3cb67677a5c4   98490dee4073
+P_t4                 14             50          False           True           True           True           True           True           True   77c0bc63ca7a   3cb67677a5c4   98490dee4073
+P_t5                 18             56          False           True           True           True           True           True           True   77c0bc63ca7a   3cb67677a5c4   98490dee4073
+Z_t1                 15             44          False          False          False          False          False           True           True   77c0bc63ca7a   3cb67677a5c4   98490dee4073
+Z_t2                 16             53          False          False          False          False           True           True           True   77c0bc63ca7a   3cb67677a5c4   da77ce0094c1
+Z_t3                 18             58          False          False          False          False          False           True           True   77c0bc63ca7a   3cb67677a5c4   da77ce0094c1
+Z_t4                 14             43          False          False          False          False          False           True           True   77c0bc63ca7a   3cb67677a5c4   da77ce0094c1
+Z_t5                 16             61          False          False          False          False          False           True           True   77c0bc63ca7a   3cb67677a5c4   98490dee4073
+rung P n=5: reached-the-skill 5/5 (Skill tool 0, Read 5), verify-block 5/5 strict (5/5 loose), runtime-check 5/5, distinct alert.ts 1 raw / 1 ws-normalised, median turns 17, median s 55
+rung N n=5: reached-the-skill 5/5 (Skill tool 5, Read 0), verify-block 4/5 strict (5/5 loose), runtime-check 5/5, distinct alert.ts 1 raw / 1 ws-normalised, median turns 14, median s 36
+rung Z n=5: reached-the-skill 0/5 (Skill tool 0, Read 0), verify-block 0/5 strict (0/5 loose), runtime-check 1/5, distinct alert.ts 1 raw / 1 ws-normalised, median turns 16, median s 53
+
+all 15 sessions: distinct alert.ts 1 raw / 1 ws-normalised

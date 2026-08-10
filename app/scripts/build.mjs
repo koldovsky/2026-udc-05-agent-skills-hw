@@ -4,15 +4,9 @@
 // wraps and reports on, not a production bundler setup.
 import { build } from "esbuild";
 import { statSync } from "node:fs";
+import { BUILD_OPTIONS, OUTFILE } from "./build-options.mjs";
 
-await build({
-  entryPoints: ["src/index.ts"],
-  bundle: true,
-  minify: true,
-  format: "esm",
-  outfile: "dist/bundle.js",
-  platform: "neutral",
-});
+await build({ ...BUILD_OPTIONS, outfile: OUTFILE });
 
-const { size } = statSync("dist/bundle.js");
-console.log(`dist/bundle.js — ${size} bytes`);
+const { size } = statSync(OUTFILE);
+console.log(`${OUTFILE} — ${size} bytes`);

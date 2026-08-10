@@ -1,0 +1,27 @@
+
+=== .agents/skills/analyzing-bundle-size  OK
+  INFO  description 401/1024 chars
+  INFO  body 72 lines, ~875 tokens
+  INFO  bundled reference references/interpreting-results.md
+  INFO  bundled reference scripts/measure-bundle.mjs
+  NOTE  3 path(s) outside the skill dir — the skill assumes this repo's layout: app/dist/bundle.js, app/scripts/ablate.mjs, app/src/widgets/index.ts
+
+=== .agents/skills/architecture-deep-dive  OK
+  INFO  description 413/1024 chars
+  INFO  body 72 lines, ~978 tokens
+  INFO  bundled reference references/architecture.md
+
+=== .agents/skills/creating-widget  OK
+  INFO  description 283/1024 chars
+  INFO  body 133 lines, ~1255 tokens
+  NOTE  8 path(s) outside the skill dir — the skill assumes this repo's layout: app/AGENTS.md, app/src/, app/src/core/registry.ts, app/src/widgets/, app/src/widgets/badge/, app/src/widgets/chip/chip.test.ts …
+
+=== .claude/skills/creating-widget  OK
+  INFO  description 283/1024 chars
+  INFO  body 133 lines, ~1255 tokens
+  NOTE  8 path(s) outside the skill dir — the skill assumes this repo's layout: app/AGENTS.md, app/src/, app/src/core/registry.ts, app/src/widgets/, app/src/widgets/badge/, app/src/widgets/chip/chip.test.ts …
+
+=== mirrors (path 1 keeps two copies of one skill — they must not drift)
+  INFO  mirror creating-widget: .agents/skills/creating-widget feb974882484 (1 file) | .claude/skills/creating-widget feb974882484 (1 file)  IDENTICAL
+
+PASS: 0 spec violation(s)

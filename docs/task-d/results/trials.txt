@@ -1,0 +1,25 @@
+trial                turns               s    opened_skill  ran_verify_blo     other_skill   runtime_check           wired      runtime_ok             src          src_ws            test         test_ws
+A_t1                    13              43            True            True           False            True            True            True    77c0bc63ca7a    3cb67677a5c4    62c44cb9f3d9    da77ce0094c1
+A_t2                    16              63            True            True           False            True            True            True    77c0bc63ca7a    3cb67677a5c4    cd8782b03ce5    98490dee4073
+A_t3                    13              42            True            True           False            True            True            True    77c0bc63ca7a    3cb67677a5c4    62c44cb9f3d9    da77ce0094c1
+A_t4                    13              44            True            True           False            True            True            True    77c0bc63ca7a    3cb67677a5c4    cd8782b03ce5    98490dee4073
+A_t5                    15              49            True            True           False            True            True            True    77c0bc63ca7a    3cb67677a5c4    62c44cb9f3d9    da77ce0094c1
+B_t1                    16              58           False           False           False           False            True            True    77c0bc63ca7a    3cb67677a5c4    cd8782b03ce5    98490dee4073
+B_t2                     8              44           False           False           False           False            True            True    77c0bc63ca7a    3cb67677a5c4    cd8782b03ce5    98490dee4073
+B_t3                    15              48           False           False           False           False            True            True    77c0bc63ca7a    3cb67677a5c4    cd8782b03ce5    98490dee4073
+B_t4                    16              41           False           False           False           False            True            True    77c0bc63ca7a    3cb67677a5c4    cd8782b03ce5    98490dee4073
+B_t5                    15              44           False           False           False           False            True            True    77c0bc63ca7a    3cb67677a5c4    cd8782b03ce5    98490dee4073
+C_t1                     7              30           False           False           False           False            True            True    77c0bc63ca7a    3cb67677a5c4    cd8782b03ce5    98490dee4073
+D_t1                     8              39           False           False           False           False            True            True    77c0bc63ca7a    3cb67677a5c4    cd8782b03ce5    98490dee4073
+E_t1                    13              35           False           False           False           False            True            True    77c0bc63ca7a    3cb67677a5c4    cd8782b03ce5    98490dee4073
+E_t2                    13              47           False           False           False           False            True            True    77c0bc63ca7a    3cb67677a5c4    cd8782b03ce5    98490dee4073
+E_t3                    13              33           False           False           False           False            True            True    77c0bc63ca7a    3cb67677a5c4    cd8782b03ce5    98490dee4073
+E_t4                    13              36           False           False           False           False            True            True    77c0bc63ca7a    3cb67677a5c4    cd8782b03ce5    98490dee4073
+E_t5                    13              34           False           False           False           False            True            True    77c0bc63ca7a    3cb67677a5c4    cd8782b03ce5    98490dee4073
+rung A n=5: runtime_check 5/5, verify-block 5/5, distinct alert.ts 1 raw / 1 ws-normalised, median turns 13, median s 44, median answer 828 ch
+rung B n=5: runtime_check 0/5, verify-block 0/5, distinct alert.ts 1 raw / 1 ws-normalised, median turns 15, median s 44, median answer 855 ch
+rung C n=1: runtime_check 0/1, verify-block 0/1, distinct alert.ts 1 raw / 1 ws-normalised, median turns 7, median s 30, median answer 479 ch
+rung D n=1: runtime_check 0/1, verify-block 0/1, distinct alert.ts 1 raw / 1 ws-normalised, median turns 8, median s 39, median answer 635 ch
+rung E n=5: runtime_check 0/5, verify-block 0/5, distinct alert.ts 1 raw / 1 ws-normalised, median turns 13, median s 35, median answer 497 ch
+
+all 17 sessions: distinct alert.ts 1 raw / 1 ws-normalised; distinct alert.test.ts 2 raw / 2 ws-normalised

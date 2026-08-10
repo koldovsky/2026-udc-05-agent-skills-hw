@@ -23,12 +23,17 @@ Baseline guidance for an Agentic IDE working in **this homework repo**.
 - `materials/architecture-brief.md` is the source of truth for what the
   skills should document; `materials/ab-task.md` is the change request used
   for the A/B validation (Task D).
+- **Answering a question about `app/`'s architecture — how the registry works,
+  why it is built this way, where a new feature belongs — starts at
+  `.agents/skills/architecture-deep-dive/SKILL.md`, not at the brief.** The
+  brief states the *intended* design; the skill's `references/architecture.md`
+  is checked against the current code and carries what the brief omits (the
+  type-erasure boundary, the escaping contract, the tree-shaking cost).
 - The homework is graded by CodeRabbit (`.coderabbit.yaml`) against the
   Definition of Done in `docs/walkthrough.md`.
 
 ## Conventions
 
-- Documentation language: Ukrainian or English (participant's choice).
 - Keep deliverables at the agreed paths so auto-review can find them:
   - `.agents/skills/creating-widget/SKILL.md` — Task A (simple skill)
   - `.agents/skills/architecture-deep-dive/SKILL.md` +
@@ -36,9 +41,20 @@ Baseline guidance for an Agentic IDE working in **this homework repo**.
   - `.agents/skills/analyzing-bundle-size/SKILL.md` + `scripts/*` — Task C
     (skill with scripts/)
   - `app/AGENTS.md` — gets a "## Skills" section (Task A)
-  - `docs/ab-validation.md` — Task D A/B write-up
-  - `docs/task-e-bonus.md` — Task E (bonus, pick one path)
-  - `.claude/skills/` — optional cross-tool mirror (Task E, path 1)
+  - `docs/task-a-verification.md` — Task A step-5 check (skill triggers unprompted)
+  - `docs/ab-validation.md` — Task D A/B write-up (its harness and grader live
+    in `docs/task-d/`; they only ever read this repo and write to a scratch lab
+    directory outside it). Every figure in the write-up is a line in
+    `docs/task-d/results/` — grader output committed verbatim, so a reviewer
+    checks the numbers without re-running 17 sessions.
+  - `docs/task-e-bonus.md` — Task E (bonus, path 1: cross-tool portability). Its
+    harness, spec linter and grader live in `docs/task-e/`; the grader imports
+    Task D's rubric instead of restating it, and `docs/task-e/results/` is its
+    output committed verbatim.
+  - `.claude/skills/creating-widget/` — cross-tool mirror (Task E, path 1): the
+    **same bytes** as `.agents/skills/creating-widget/`. Cursor reads
+    `.agents/skills/`; Claude Code reads `.claude/skills/` and does not scan
+    `.agents/`. Edit one copy → copy it to the other in the same commit.
 - Every `SKILL.md` needs YAML frontmatter with at least `name` and
   `description` — that's the part every current tool reads before deciding
   whether to load the rest (progressive disclosure).
@@ -63,3 +79,9 @@ Before opening a PR: `cd app && npm test` is green, all three
 `.agents/skills/**/SKILL.md` have real frontmatter + concrete instructions
 (not the raw template), `app/AGENTS.md` has a "## Skills" section, and
 `docs/ab-validation.md` shows a real, specific difference (not placeholders).
+
+`python3 docs/task-e/portlint.py` checks every `SKILL.md` against the published
+[Agent Skills spec](https://agentskills.io/specification) — frontmatter fields,
+`name`/description limits, `name` == directory — and hashes the two copies of
+`creating-widget` against each other. Exit 1 = a spec violation or drifted
+mirror; run it after touching any skill.
