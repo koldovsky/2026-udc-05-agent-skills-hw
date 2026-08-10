@@ -12,7 +12,14 @@ This skill provides a structured workflow for guiding users through collaborativ
 **Trigger conditions:**
 - User mentions writing documentation: "write a doc", "draft a proposal", "create a spec", "write up"
 - User mentions specific doc types: "PRD", "design doc", "decision doc", "RFC"
+- User asks to review, polish, tighten, or improve existing markdown documentation
 - User seems to be starting a substantial writing task
+
+**Review/polish behavior:**
+- Reuse the same three-stage process.
+- Stage 1 focuses on collecting the current document, quality goals, constraints, and target audience.
+- Stage 2 prioritizes surgical edits for clarity, structure, accuracy, and tone while preserving intent.
+- Stage 3 verifies that revised content is understandable to fresh readers and that edits resolved the original issues.
 
 **Initial offer:**
 Offer the user a structured workflow for co-authoring the document. Explain the three stages:
@@ -185,7 +192,7 @@ Based on what they've selected, ask if there's anything important missing for th
 
 ### Step 5: Drafting
 
-Use `str_replace` to replace the placeholder text for this section with the actual drafted content.
+Use the current agent's supported editing mechanism to replace the placeholder text for this section with the drafted content.
 
 Announce the [SECTION NAME] section will be drafted now based on what they've selected.
 
@@ -205,9 +212,9 @@ Provide a note: Instead of editing the doc directly, ask them to indicate what t
 ### Step 6: Iterative Refinement
 
 As user provides feedback:
-- Use `str_replace` to make edits (never reprint the whole doc)
-- **If using artifacts:** Provide link to artifact after each edit
-- **If using files:** Just confirm edits are complete
+- Use the current agent's supported file-editing mechanism for targeted edits (avoid reprinting the whole doc)
+- **If using artifacts:** Provide the artifact link after each edit
+- **If using files:** Confirm edits are complete
 - If user edits doc directly and asks to read it: mentally note the changes they made and keep them in mind for future sections (this shows their preferences)
 
 **Continue iterating** until user is satisfied with the section.
@@ -343,6 +350,7 @@ Ask if they want one more review, or if the work is done.
 
 **If user wants final review, provide it. Otherwise:**
 Announce document completion. Provide a few final tips:
+- Before linking any conversation transcript in an appendix, perform a privacy and permission review; prefer a sanitized summary and require redaction or explicit authorization for confidential or personal data
 - Consider linking this conversation in an appendix so readers can see how the doc was developed
 - Use appendices to provide depth without bloating the main doc
 - Update the doc as feedback is received from real readers
@@ -364,9 +372,8 @@ Announce document completion. Provide a few final tips:
 - Don't let gaps accumulate - address them as they come up
 
 **Artifact Management:**
-- Use `create_file` for drafting full sections
-- Use `str_replace` for all edits
-- Provide artifact link after every change
+- If artifacts are supported and chosen, use them for drafting and provide links after updates
+- If artifacts are not supported, use the agent's available file-editing mechanism and confirm edits in chat
 - Never use artifacts for brainstorming lists - that's just conversation
 
 **Quality over Speed:**
