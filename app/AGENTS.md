@@ -36,4 +36,8 @@ entry point is `src/index.ts`.
   changes there affect all widgets; keep its public API (`register`, `create`,
   `listWidgets`) stable.
 
-<!-- Task A adds a "## Skills" section here pointing at .agents/skills/ -->
+## Skills
+
+- `creating-widget`: Use when adding a new widget so implementation follows the exact project golden path (`src/widgets/<name>/`, self-registration via `register()`, colocated tests, and index wiring).
+- `architecture-deep-dive`: Use when explaining architecture boundaries, responsibility split, and where new features should be implemented.
+- `analyzing-bundle-size`: Use when asked to report current bundle size or compare size impact based on real build output from `dist/bundle.js`.
