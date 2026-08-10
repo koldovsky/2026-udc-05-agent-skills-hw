@@ -36,4 +36,12 @@ entry point is `src/index.ts`.
   changes there affect all widgets; keep its public API (`register`, `create`,
   `listWidgets`) stable.
 
-<!-- Task A adds a "## Skills" section here pointing at .agents/skills/ -->
+## Skills
+
+This project uses agent skills to encode specialized knowledge for adding widgets and understanding the architecture:
+
+- **[creating-widget](../.agents/skills/creating-widget/SKILL.md)** — Teaches the golden path for creating a new widget. Use when building a widget to follow the established patterns: pure factory function, TypeScript strict, colocated tests, and self-registration.
+
+- **[architecture-deep-dive](../.agents/skills/architecture-deep-dive/SKILL.md)** — Deep architectural reference for the widget-registry. Use for understanding registry mechanics, type system design, bundle structure, and design constraints. Includes detailed [references/architecture.md](../.agents/skills/architecture-deep-dive/references/architecture.md).
+
+- **[analyzing-bundle-size](../.agents/skills/analyzing-bundle-size/SKILL.md)** — Bundle analysis and optimization techniques. Use when measuring the impact of widgets on bundle size. Includes [scripts/analyze-bundle.mjs](../.agents/skills/analyzing-bundle-size/scripts/analyze-bundle.mjs) for parsing bundle composition.
