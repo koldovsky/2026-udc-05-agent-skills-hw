@@ -26,14 +26,25 @@ entry point is `src/index.ts`.
 - No `any`, no `@ts-ignore`.
 - One widget = one folder: `src/widgets/<name>/<name>.ts` + `<name>.test.ts`.
 - Widget factories are pure — no DOM access, no side effects beyond
-  `register()` at module load.
+`register()` at module load.
+
+
 
 ## Guardrails
 
 - Do not add a UI framework (React/Vue/etc.) — this library stays framework-free.
 - Do not add new npm dependencies without a documented reason.
 - `src/core/registry.ts` is the shared contract every widget depends on —
-  changes there affect all widgets; keep its public API (`register`, `create`,
-  `listWidgets`) stable.
+changes there affect all widgets; keep its public API (`register`, `create`,
+`listWidgets`) stable.
 
-<!-- Task A adds a "## Skills" section here pointing at .agents/skills/ -->
+
+
+## Skills
+
+Project skills live in `.agents/skills/`. Use them when the matching task comes up:
+
+- **creating-widget** (`.agents/skills/creating-widget/SKILL.md`) — how to add a new widget: pure factory + `register()`, colocated test, and import in `src/widgets/index.ts`.
+- **architecture-deep-dive** (`.agents/skills/architecture-deep-dive/SKILL.md`) — explains registry contract, module boundaries, and where features belong; depth in `references/architecture.md`.
+- **analyzing-bundle-size** (`.agents/skills/analyzing-bundle-size/SKILL.md`) — measures bundle size via `scripts/analyze-bundle-size.mjs` (wraps `npm run build`); use when estimating or checking bundle-size impact.
+
