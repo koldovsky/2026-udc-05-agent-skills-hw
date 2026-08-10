@@ -18,7 +18,7 @@ Do **not** use this skill for editing `registry.ts` public API, bundle-size work
 
 Follow the golden path from `materials/architecture-brief.md`. Mirror `app/src/widgets/badge/` exactly.
 
-1. **Factory module** ù create `app/src/widgets/<name>/<name>.ts`:
+1. **Factory module**: create `app/src/widgets/<name>/<name>.ts`:
    - Import `register` and `WidgetProps` from `../../core/registry.js`.
    - Export a props interface: `export interface <Name>Props extends WidgetProps { ... }`.
    - Export a pure factory: `export function create<Name>(props: <Name>Props): string` that returns an HTML string (no DOM, no side effects).
@@ -26,14 +26,16 @@ Follow the golden path from `materials/architecture-brief.md`. Mirror `app/src/w
    - Named exports only; kebab-case folder/file; no `any` / `@ts-ignore`.
    - Do **not** change signatures of `register` / `create` / `listWidgets` in `registry.ts`.
 
-2. **Colocated tests** ù create `app/src/widgets/<name>/<name>.test.ts`:
+2. **Colocated tests**: create `app/src/widgets/<name>/<name>.test.ts`:
    - Vitest `describe` / `it` / `expect`.
    - Import the factory from `./<name>.js` and assert the returned HTML string(s).
 
-3. **Wire into the registry** ù add one line to `app/src/widgets/index.ts`:
+3. **Wire into the registry**: add one line to `app/src/widgets/index.ts`:
+
    ```ts
    import "./<name>/<name>.js";
    ```
+
    (so the module-load `register()` runs). Do not re-export the factory from here; keep exporting only `create` / `listWidgets` from the registry.
 
 Example shape (from `badge`):
@@ -61,11 +63,13 @@ Confirm the new widget follows the golden path:
 1. Files exist:
    - `app/src/widgets/<name>/<name>.ts`
    - `app/src/widgets/<name>/<name>.test.ts`
-2. Factory self-registers ù `register("<name>",` appears in `<name>.ts` (search for `register(`).
-3. Wired in ù `app/src/widgets/index.ts` contains `import "./<name>/<name>.js";`.
+2. Factory self-registers: `register("<name>",` appears in `<name>.ts` (search for `register(`).
+3. Wired in: `app/src/widgets/index.ts` contains `import "./<name>/<name>.js";`.
 4. Factory is pure and returns an HTML string; named export only (no default export).
 5. Tests pass and types check:
+
    ```bash
    cd app && npm test
    cd app && npm run typecheck
    ```
+

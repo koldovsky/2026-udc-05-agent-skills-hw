@@ -22,7 +22,7 @@ when widget modules are imported (side effect at module load).
 
 ### Module map
 
-```
+```text
 app/src/
   core/registry.ts          # shared contract: types + Map + public API
   widgets/
@@ -112,6 +112,7 @@ intended pattern:
 ```ts
 import "./badge/badge.js";
 import "./spinner/spinner.js";
+import "./alert/alert.js";
 
 export { listWidgets, create } from "../core/registry.js";
 ```

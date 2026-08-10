@@ -7,6 +7,8 @@ description: >-
   size, or compare before/after build output.
 ---
 
+# Analyzing bundle size
+
 ## When to use this
 
 - User asks to estimate / measure the bundle size of the library or `app/`.

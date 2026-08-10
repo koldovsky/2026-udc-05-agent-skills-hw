@@ -18,26 +18,48 @@
 
 ## Result B — skill removed
 
-Новий чат ([Alert without skill](d2aa073d-2c88-4e4c-9d75-281789ea7c9d)); скіл прибрано / інструкція «не відновлювати creating-widget».
+Ізольований повторний прогін на чистому worktree від `HEAD` (`ab-result-b-clean`),
+агент: [Alert without skill (clean)](083a2089-8c56-43a3-93b1-3d69180fed36).
 
-- AI **не** відкривав `creating-widget/SKILL.md` — копіював патерн з `badge.ts` / `badge.test.ts` і `app/AGENTS.md`.
-- Файли `alert.ts` + `alert.test.ts` знову вийшли правильними (той самий HTML і `register()`).
-- **`widgets/index.ts` не змінював** — лише зауважив, що import уже є (залишок після прогону A). Без того залишку `create("alert", …)` не був би discoverable.
-- Перевірив лише `npm test`; `npm run typecheck` зі скілового Verify **не** запускав.
-- Checklist скіла (factory → test → wire-up → verify) не виконувався як явний план — лише дзеркалення badge.
+**Baseline перед промптом (без залишків Result A):**
+
+- `app/src/widgets/alert/` відсутня
+- у `app/src/widgets/index.ts` **немає** `import "./alert/alert.js"` (лише badge + spinner)
+- `.agents/skills/creating-widget/` переміщено за межі skills у `_disabled-skills/creating-widget`
+- рядок про `creating-widget` прибрано з `app/AGENTS.md` → `## Skills`
+
+**Фактичний результат:**
+
+- AI **не** відкривав `creating-widget/SKILL.md` — патерн узяв з `badge.ts` / `badge.test.ts` і `app/AGENTS.md` (також глянув spinner).
+- Створив `app/src/widgets/alert/alert.ts` — pure `createAlert`, `tone` default `"info"`, `register("alert", createAlert)`.
+- Додав colocated `app/src/widgets/alert/alert.test.ts` (default + explicit tone).
+- **Оновив** `app/src/widgets/index.ts` — додав `import "./alert/alert.js";` (wire-up виконано без залишку A).
+- Запустив `npm test` (зелений) і `npm run typecheck` (зелений).
+- Named exports, без `any`, `registry.ts` не чіпав.
+- Checklist скіла як явний план не використовувався — ad-hoc mirror існуючих widgets.
+
+> Попередній Result B (чат `d2aa073d-…`) був забруднений: import alert уже лежав у
+> `index.ts` після A, тож «пропуск wire-up» був артефактом baseline, не чистої
+> поведінки без скіла. Цей розділ замінює його ізольованим прогоном.
 
 ## Difference table
 
-| Aspect | A (skill available) | B (skill removed) |
+| Aspect | A (skill available) | B (skill removed, clean baseline) |
 |---|---|---|
-| File location | `widgets/alert/alert.ts` | `widgets/alert/alert.ts` (скопійовано з badge) |
+| File location | `app/src/widgets/alert/alert.ts` | `app/src/widgets/alert/alert.ts` (mirror badge) |
 | Registered via `register()` | yes | yes |
 | Colocated test added | yes | yes |
-| Wired into `widgets/index.ts` | yes — AI сам додав import | no — не чіпав; покладався на вже наявний рядок |
+| Wired into `app/src/widgets/index.ts` | yes — додав import | yes — додав import (на чистому index без alert) |
 | Named exports / no `any` | yes | yes |
-| Process | прочитав SKILL.md → checklist golden path | без скіла; ad-hoc mirror badge |
-| Verify | `npm test` + `typecheck` | лише `npm test` |
+| Process | прочитав SKILL.md → golden-path checklist | без скіла; ad-hoc mirror badge / AGENTS.md |
+| Verify | `npm test` + `typecheck` (зі скіла) | `npm test` + `typecheck` (сам вирішив запустити) |
 
 ## Conclusion
 
-Скіл реально змінив поведінку: з ним AI йшов за checklist (зокрема **обов’язковий wire-up у `index.ts`** і повний Verify), без нього — відтворив factory/test з badge, але **пропустив крок discoverability**, бо index уже був «зелений» після A. Різниця варта скіла саме для кроків, які промпт не називає явно (тест, `register()`, import у `index.ts`).
+На **чистому** baseline без залишку A структурний результат майже збігся: і зі
+скілом, і без нього AI зробив factory + `register()` + colocated test + import у
+`index.ts`, тести зелені. Реальна різниця — у **процесі**: A явно підвантажив
+`creating-widget` і йшов checklist’ом скіла; B обійшовся без нього, копіюючи
+`badge`. Раніше задокументований «пропуск wire-up» у B **не відтворився** без
+контамінації від A — discoverability підказало формулювання промпта («Make it
+discoverable the same way every other widget is») плюс наявні імпорти badge/spinner.
