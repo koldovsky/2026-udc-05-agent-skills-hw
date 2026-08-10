@@ -52,3 +52,4 @@ An Agentic IDE with Agent Skills support (Claude Code, Cursor, GitHub Copilot,
 and most current tools support the open `SKILL.md` standard — check
 `docs/walkthrough.md` §0 if unsure) + a GitHub account + Node 22+. Questions →
 the course chat (feedback within 2 weeks).
+
