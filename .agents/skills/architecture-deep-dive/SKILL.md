@@ -1,6 +1,6 @@
 ---
 name: architecture-deep-dive
-description: How app/ is built — module boundaries, the registry contract, where type safety ends, where new code belongs. Use for any explain/why/where question about this codebase's structure: architecture overviews, onboarding, design rationale, feature placement, impact of touching core/registry.ts, reviewing a boundary change. Not for writing a widget (creating-widget) or measuring the bundle (analyzing-bundle-size).
+description: How app/ is built — module boundaries, the registry contract, where type safety ends, where new code belongs. Use for any explain/why/where question about this codebase's structure — architecture overviews, onboarding, design rationale, feature placement, impact of touching core/registry.ts, reviewing a boundary change. Not for writing a widget (creating-widget) or measuring the bundle (analyzing-bundle-size).
 ---
 
 # Architecture deep dive

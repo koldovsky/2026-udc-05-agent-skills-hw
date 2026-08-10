@@ -69,7 +69,7 @@ $ shasum -a 256 dist/bundle.js
 Raw, gzip, the widget set **and the sha256 the script prints** all match — the
 numbers come from the build, not from the script's imagination.
 
-`cd app && npm test` → 5 passed. `npm run typecheck` → clean.
+`cd app && npm test` → 6 passed. `npm run typecheck` → clean.
 
 ### Flags and exit codes
 
@@ -87,10 +87,11 @@ numbers come from the build, not from the script's imagination.
 
 ### The drift guard, deliberately tripped
 
-The per-widget table comes from in-memory ablation builds whose options are a
-*copy* of `app/scripts/build.mjs` — a copy that can silently rot. The guard is
-that the **un-ablated** ablation build must reproduce `dist/bundle.js`
-**byte for byte, by sha256**. Two trips, each reverted immediately after:
+The per-widget table comes from in-memory ablation builds whose options were, at
+the time of this run, a *copy* of `app/scripts/build.mjs` — a copy that can
+silently rot. The guard is that the **un-ablated** ablation build must reproduce
+`dist/bundle.js` **byte for byte, by sha256**. Two trips, each reverted
+immediately after:
 
 `minify: true` → `false`:
 
@@ -127,11 +128,28 @@ Identical length, different content: esbuild mangles identifiers in a different
 frequency order when the module graph differs, so `i`/`n` are swapped throughout.
 A size comparison passes this; a hash does not. The fix was structural rather
 than cosmetic — ablate by swapping a module *inside the real entry graph*
-([`ablatePlugin`](../.agents/skills/analyzing-bundle-size/scripts/measure-bundle.mjs)),
-which makes the un-ablated build genuinely identical to `npm run build` output
-and so makes the byte-for-byte claim true rather than approximate.
+([`ablatePlugin`](../app/scripts/ablate.mjs)), which makes the un-ablated build
+genuinely identical to `npm run build` output and so makes the byte-for-byte
+claim true rather than approximate.
 
-I also probed whether any single `BUILD_OPTIONS` change reproduces the
+**Update after review — the byte counts above are historical.** Two changes
+landed after this run, and one of them moved the number: `createSpinner` now
+HTML-escapes its `label`, so the shipped bundle is **714 B raw / 431 B gzip**
+(badge 98 B, spinner 303 B, baseline 219 B, `attribution check … ✓`), not the
+567 B / 346 B quoted throughout this file. Everything here still describes what
+the run at the time printed; re-run the script for a current number, which is
+the whole point of the skill.
+
+The second change: the skill's script no longer bundles anything itself —
+`loadEsbuild` / `ablatePlugin` / `buildWithout` moved to `app/scripts/ablate.mjs`
+behind a new `npm run ablate`, so `measure-bundle.mjs` wraps the project's npm
+scripts and only formats their output (`AGENTS.md` guardrail: a skill's
+`scripts/` "should wrap the project's own `npm` scripts, nothing more"). Both
+builds now import `app/scripts/build-options.mjs`, so the copy that rots above
+cannot exist any more — the sha256 guard stays, because a stale `dist/bundle.js`
+under `--skip-build` still can. The `[UNTRUSTED]` message names the new cause.
+
+I also probed whether any single build-option change reproduces the
 same-size-different-bytes case: of 11 candidates, `platform: browser|node`,
 `target: es2020`, `charset: utf8`, `mangleQuoted` and `treeShaking: false` are
 byte-identical to the shipped bundle (so attribution stays valid — correctly not

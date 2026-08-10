@@ -65,10 +65,12 @@ is registered from somewhere other than a side-effect import in
 
 ## Files
 
-- `scripts/measure-bundle.mjs` — runs the real `npm run build` in `app/`, reads
-  `dist/bundle.js`, gzips it in memory, and derives per-widget marginal cost
-  from in-memory ablation builds (`write: false`, nothing extra hits disk, no
-  network). Resolves `app/` from its own location, so cwd does not matter.
+- `scripts/measure-bundle.mjs` — wraps the app's own npm scripts: `npm run
+  build` for the real artefact, then `npm run ablate`
+  (`app/scripts/ablate.mjs`) for per-widget marginal cost from in-memory
+  ablation builds (`write: false`, nothing extra hits disk, no network). It
+  gzips and formats; it bundles nothing itself. Resolves `app/` from its own
+  location, so cwd does not matter.
 - `references/interpreting-results.md` — how to read the output, why marginals
   do not sum, the before/after delta workflow, and what `[UNTRUSTED]` means.
   Open it when interpreting, not when merely running.

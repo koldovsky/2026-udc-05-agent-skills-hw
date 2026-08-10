@@ -15,7 +15,7 @@ frozen sizes in it would be the exact failure the skill exists to prevent.
 
 ## The report, field by field
 
-```
+```text
 npm run build → app/dist/bundle.js
   raw   <N> B
   gzip  <N> B
@@ -99,22 +99,25 @@ real measurement afterwards.
 
 ## When the table says `[UNTRUSTED]`
 
-The script mirrors `app/scripts/build.mjs` in its own `BUILD_OPTIONS`, and that
-copy can rot. The guard: the **un-ablated** ablation build must reproduce
-`app/dist/bundle.js` byte for byte, compared by sha256 — not by size, since a
-drifted build can easily land on the same byte count with different contents.
-This works only because the script ablates by swapping modules inside the *real*
-`src/index.ts` graph; a hand-written synthetic entry would produce a differently
-mangled — and so never hash-equal — bundle.
+The ablation builds come from `npm run ablate` (`app/scripts/ablate.mjs`), which
+shares `app/scripts/build-options.mjs` with `app/scripts/build.mjs` — the two
+builds cannot drift by editing one and forgetting the other. They can still
+disagree for other reasons, so the guard stays: the **un-ablated** ablation
+build must reproduce `app/dist/bundle.js` byte for byte, compared by sha256 —
+not by size, since a diverged build can easily land on the same byte count with
+different contents. This works only because the script ablates by swapping
+modules inside the *real* `src/index.ts` graph; a hand-written synthetic entry
+would produce a differently mangled — and so never hash-equal — bundle.
 
 When the hashes differ the script prints `[UNTRUSTED]` and names the likely
 cause:
 
-- **after a real build** — `BUILD_OPTIONS` has drifted from
-  `app/scripts/build.mjs`. Re-sync it, then re-run.
-- **under `--skip-build`** — either that same drift, or `dist/bundle.js` is
+- **after a real build** — `ablate.mjs` no longer reproduces what `build.mjs`
+  writes (an option applied on only one side, or a plugin that leaks into the
+  un-ablated build). Fix that, then re-run.
+- **under `--skip-build`** — either that same divergence, or `dist/bundle.js` is
   simply stale relative to the source. Re-run without `--skip-build` first; if
-  it still disagrees, it is drift.
+  it still disagrees, the two builds really have parted ways.
 
 Either way: **the headline `raw`/`gzip` numbers remain valid** — they are read
 off the artefact the real `npm run build` produced, and no ablation feeds them.

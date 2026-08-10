@@ -13,25 +13,13 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync, statSync } from "node:fs";
-import { createRequire } from "node:module";
-import { basename, dirname, join, resolve } from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { gzipSync } from "node:zlib";
 
 // Resolved from this file, not from cwd — the agent may invoke it from anywhere.
 const APP_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "../../../../app");
 const BUNDLE = join(APP_DIR, "dist/bundle.js");
-const WIDGETS_INDEX = join(APP_DIR, "src/widgets/index.ts");
-
-// Mirror of app/scripts/build.mjs, minus outfile (these builds stay in memory).
-// Drift here is caught by the hash check in measureWidgets() below.
-const BUILD_OPTIONS = {
-  entryPoints: ["src/index.ts"],
-  bundle: true,
-  minify: true,
-  format: "esm",
-  platform: "neutral",
-};
 
 function fail(message) {
   console.error(`measure-bundle: ${message}`);
@@ -45,10 +33,13 @@ function parseArgs(argv) {
     if (arg === "--json") flags.json = true;
     else if (arg === "--skip-build") flags.skipBuild = true;
     else if (arg === "--budget") {
-      flags.budget = Number.parseInt(argv[(i += 1)], 10);
-      if (!Number.isInteger(flags.budget) || flags.budget <= 0) {
-        fail("--budget needs a positive byte count, e.g. --budget 2000");
+      // Digits and nothing else: Number.parseInt would happily read "2000B" as
+      // 2000 and silently enforce a ceiling the caller never asked for.
+      const raw = argv[(i += 1)];
+      if (!/^\d+$/.test(raw ?? "") || Number(raw) <= 0 || !Number.isSafeInteger(Number(raw))) {
+        fail(`--budget needs a whole positive byte count, e.g. --budget 2000 (got ${raw ?? "nothing"})`);
       }
+      flags.budget = Number(raw);
     } else if (arg === "--help" || arg === "-h") {
       // The header comment of this file IS the help text — one source, no drift.
       const header = readFileSync(fileURLToPath(import.meta.url), "utf8").split("\n").slice(1, 12);
@@ -74,79 +65,37 @@ function runRealBuild() {
   }
 }
 
-// The widget set is whatever widgets/index.ts side-effect-imports — that file is
-// the single place that decides what ships (see the architecture-deep-dive skill).
-function readWidgetImports() {
-  const source = readFileSync(WIDGETS_INDEX, "utf8");
-  return [...source.matchAll(/^import\s+"(\.\/[^"]+)";/gm)].map((match) => {
-    const specifier = match[1];
-    const [head, ...rest] = specifier.replace(/^\.\//, "").split("/");
-    // ./badge/badge.js -> badge ;  ./badge.js -> badge
-    return { specifier, name: rest.length ? head : basename(head, ".js") };
-  });
-}
-
-async function loadEsbuild() {
-  // esbuild is a devDependency of app/, not of this script's directory.
-  const requireFromApp = createRequire(pathToFileURL(join(APP_DIR, "package.json")));
-  return import(pathToFileURL(requireFromApp.resolve("esbuild")).href);
-}
-
-// Replaces the named widget modules with empty ones *as imported by
-// widgets/index.ts*, leaving the rest of the graph untouched. Ablating this way
-// — rather than rebuilding a hand-written entry — is what lets the un-ablated
-// build be byte-identical to the shipped bundle, which is the drift check.
-function ablatePlugin(specifiers) {
-  const drop = new Set(specifiers);
-  return {
-    name: "ablate-widgets",
-    setup(build) {
-      if (!drop.size) return;
-      build.onResolve({ filter: /^\.\// }, (args) =>
-        drop.has(args.path) && args.importer === WIDGETS_INDEX
-          ? { path: args.path, namespace: "ablated" }
-          : null,
-      );
-      build.onLoad({ filter: /.*/, namespace: "ablated" }, () => ({ contents: "", loader: "js" }));
-    },
-  };
-}
-
-async function buildWithout(esbuild, specifiers) {
-  const result = await esbuild.build({
-    ...BUILD_OPTIONS,
-    absWorkingDir: APP_DIR,
-    write: false,
-    plugins: [ablatePlugin(specifiers)],
-  });
-  return Buffer.from(result.outputFiles[0].contents);
-}
-
-async function measureWidgets(shipped) {
-  const esbuild = await loadEsbuild();
-  const imports = readWidgetImports();
-  const fullBuffer = await buildWithout(esbuild, []);
-  const full = sizes(fullBuffer);
-  const baseline = sizes(await buildWithout(esbuild, imports.map((w) => w.specifier)));
-
-  const widgets = [];
-  for (const widget of imports) {
-    const without = sizes(await buildWithout(esbuild, [widget.specifier]));
-    widgets.push({ name: widget.name, raw: full.raw - without.raw, gzip: full.gzip - without.gzip });
+// Ablation is the app's own job — `npm run ablate` (app/scripts/ablate.mjs)
+// owns the esbuild work and the widget set, so this script never bundles
+// anything itself; it wraps the project's npm scripts and formats the result.
+function measureWidgets(shipped) {
+  const npm = process.platform === "win32" ? "npm.cmd" : "npm";
+  let report;
+  try {
+    const stdout = execFileSync(npm, ["run", "--silent", "ablate"], {
+      cwd: APP_DIR,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    report = JSON.parse(stdout);
+  } catch (error) {
+    // npm/node stderr is a stack trace; report the one line that says what broke.
+    const lines = (error.stderr || error.message || "").split("\n").map((l) => l.trim()).filter(Boolean);
+    const gist = lines.find((line) => /error/i.test(line)) ?? lines.at(-1) ?? "no output";
+    throw new Error(`\`npm run ablate\` failed: ${gist.slice(0, 200)}`);
   }
 
   // The un-ablated build must reproduce the shipped bundle byte for byte. If it
-  // does not, either BUILD_OPTIONS has drifted from app/scripts/build.mjs or
-  // dist/bundle.js is stale (--skip-build) — either way the marginal numbers
-  // describe a build nobody ships.
-  const syntheticHash = sha256(fullBuffer);
+  // does not, either app/scripts/ has changed how it builds or dist/bundle.js is
+  // stale (--skip-build) — either way the marginal numbers describe a build
+  // nobody ships.
   return {
-    widgets,
-    baseline,
-    syntheticRaw: full.raw,
-    syntheticHash,
+    widgets: report.widgets,
+    baseline: report.baseline,
+    syntheticRaw: report.full.raw,
+    syntheticHash: report.full.hash,
     shippedHash: shipped.hash,
-    trusted: syntheticHash === shipped.hash,
+    trusted: report.full.hash === shipped.hash,
   };
 }
 
@@ -156,9 +105,9 @@ function driftReason(attribution, shipped, built) {
       ? `same size (${shipped.raw} B), different bytes`
       : `synthetic ${attribution.syntheticRaw} B != shipped ${shipped.raw} B`;
   const cause = built
-    ? "BUILD_OPTIONS in this script has drifted from app/scripts/build.mjs"
-    : "BUILD_OPTIONS has drifted from app/scripts/build.mjs, or dist/bundle.js is stale (--skip-build)";
-  return `  attribution check: ${sizeNote} — ${cause}; re-sync and re-run before quoting the table above`;
+    ? "app/scripts/ablate.mjs no longer reproduces what app/scripts/build.mjs writes"
+    : "dist/bundle.js is stale (--skip-build), or app/scripts/ablate.mjs no longer reproduces what app/scripts/build.mjs writes";
+  return `  attribution check: ${sizeNote} — ${cause}; fix that and re-run before quoting the table above`;
 }
 
 function printReport({ shipped, budget, attribution, attributionError, built }) {
@@ -204,12 +153,14 @@ const bundleBuffer = readFileSync(BUNDLE);
 const shipped = { ...sizes(bundleBuffer), hash: sha256(bundleBuffer), mtime: statSync(BUNDLE).mtime.toISOString() };
 
 let attributionError = null;
-const attribution = await measureWidgets(shipped).catch((error) => {
+let attribution = null;
+try {
+  attribution = measureWidgets(shipped);
+} catch (error) {
   attributionError = /esbuild/i.test(error.message)
     ? `${error.message} — run \`npm install\` in app/`
     : error.message;
-  return null;
-});
+}
 
 if (flags.json) {
   console.log(

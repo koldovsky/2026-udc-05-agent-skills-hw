@@ -260,12 +260,20 @@ file can demonstrate, is the part that survived every ablation.
   load independent, and only loosely about the seconds next to them.
 - The typecheck check was scored by a bug for all 17 sessions (see the rubric
   section). Fixed in `grade.py`; unverifiable for these runs.
+- Check 5 (".js on every relative import") only collected `from "…"`
+  specifiers, so it never looked at the side-effect `import "./alert/alert.js";`
+  line in `widgets/index.ts` — a missing `.js` there would have passed. Widened
+  in `grade.py` after the runs; like the typecheck fix, it cannot be re-scored
+  against these 17 sessions, whose lab directory is gone. Check 4 (the wiring
+  line exists) and the runtime checks were unaffected.
 - C and D are single sessions. The A/B/E comparisons carry the argument.
 
 ## Repo state
 
 Every session ran in an isolated copy under a scratch lab directory; the working
 repo was only read, never written by an agent. No `alert` widget is committed —
-`app/src/widgets/` still holds `badge` and `spinner`, so the byte counts in
-[task-c-verification.md](./task-c-verification.md) stay valid. `cd app && npm
-test` → **5 passed**, `npm run typecheck` clean.
+`app/src/widgets/` still holds `badge` and `spinner`. The byte counts in
+[task-c-verification.md](./task-c-verification.md) have since been superseded —
+`createSpinner` now escapes its `label`, which moved the bundle; that file's
+update note carries the current figures. `cd app && npm test` → **6 passed**,
+`npm run typecheck` clean.

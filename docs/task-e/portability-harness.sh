@@ -110,27 +110,62 @@ TXT
         commit -qm "portability baseline: run$r"
   done
   # Byte-identity is the whole premise: P's skill and N's skill must be one file.
-  shasum -a 256 "$LAB/runP/.agents/skills/creating-widget/SKILL.md" \
-                "$LAB/runN/.claude/skills/creating-widget/SKILL.md" \
-    | tee "$LAB/identity.txt"
+  # Assert it before recording it — a ladder whose two copies differ measures
+  # two skills, not one loader, so it must not silently produce results.
+  local skill_p="$LAB/runP/.agents/skills/creating-widget/SKILL.md"
+  local skill_n="$LAB/runN/.claude/skills/creating-widget/SKILL.md"
+  if ! cmp -s "$skill_p" "$skill_n"; then
+    echo "FATAL: P and N do not hold the same SKILL.md bytes — the premise of this" >&2
+    echo "       experiment is broken; re-sync the two copies before running." >&2
+    shasum -a 256 "$skill_p" "$skill_n" >&2
+    return 1
+  fi
+  shasum -a 256 "$skill_p" "$skill_n" | tee "$LAB/identity.txt"
   echo "ladder ready in $LAB"
+}
+
+# Prints why a trace is not a data point and exits 1; silent + 0 when it is one.
+# A truncated, empty or unparseable .jsonl counts as a failure — never as "the
+# agent chose not to use the skill".
+trace_failure() {
+  python3 - "$1" <<'PY'
+import json, sys
+try:
+    lines = [l for l in open(sys.argv[1]).read().splitlines() if l.strip()]
+    last = json.loads(lines[-1])
+except (OSError, IndexError, ValueError) as e:
+    print(f"unreadable trace: {type(e).__name__}: {e}")
+    sys.exit(1)
+if last.get("type") != "result":
+    print(f"trace ends on a {last.get('type')!r} event, not a result — session was cut short")
+    sys.exit(1)
+if last.get("is_error"):
+    print(last.get("result") or "result event flagged is_error with no text")
+    sys.exit(1)
+PY
 }
 
 # rung, tag, prompt file, and whether to snapshot the widget artefacts
 one_session() {
-  local r=$1 tag=$2 pf=$3 snapshot=${4:-yes} d="$LAB/run$1"
+  local r=$1 tag=$2 pf=$3 snapshot=${4:-yes} d="$LAB/run$1" status=0 why
   git -C "$d" reset -q --hard && git -C "$d" clean -qfd
   (cd "$d" && claude -p "$(cat "$pf")" --output-format stream-json --verbose \
-      --allowedTools "${ALLOWED[@]}" > "$LAB/$tag.jsonl" 2> "$LAB/$tag.err")
+      --allowedTools "${ALLOWED[@]}" > "$LAB/$tag.jsonl" 2> "$LAB/$tag.err") || status=$?
   # A session killed by an API/limit error is not a data point — mark and bail so
-  # it can never be counted as "the agent chose not to use the skill".
-  if python3 -c "import json,sys;l=open(sys.argv[1]).read().splitlines();\
-sys.exit(0 if l and json.loads(l[-1]).get('is_error') else 1)" "$LAB/$tag.jsonl" 2>/dev/null; then
-    python3 -c "import json,sys;print(json.loads(open(sys.argv[1]).read().splitlines()[-1]).get('result'))" \
-        "$LAB/$tag.jsonl" > "$LAB/FAILED_$tag.txt"
+  # it can never be counted as "the agent chose not to use the skill". Both
+  # halves matter: claude's own exit code, and the trace it left behind. Failure
+  # is decided before the snapshot, so no artefact of a dead session is graded.
+  if [ "$status" -ne 0 ]; then
+    { echo "claude exited $status"; tail -20 "$LAB/$tag.err"; } > "$LAB/FAILED_$tag.txt"
+    echo "$tag FAILED (claude exited $status; see FAILED_$tag.txt) — rerun this trial"
+    return 1
+  fi
+  if ! why=$(trace_failure "$LAB/$tag.jsonl"); then
+    printf '%s\n' "$why" > "$LAB/FAILED_$tag.txt"
     echo "$tag FAILED (see FAILED_$tag.txt) — rerun this trial"
     return 1
   fi
+  rm -f "$LAB/FAILED_$tag.txt"
   [ "$snapshot" = yes ] || { echo "$tag done"; return 0; }
   mkdir -p "$LAB/snap/$tag"
   cp "$d"/app/src/widgets/alert/alert*.ts "$LAB/snap/$tag/" 2>/dev/null
@@ -143,13 +178,27 @@ sys.exit(0 if l and json.loads(l[-1]).get('is_error') else 1)" "$LAB/$tag.jsonl"
   echo "$tag done"
 }
 
+# A wave waits on each PID individually: bare `wait` returns 0 whatever the
+# background sessions did, which would hide a failed session in the exit code.
+wave() {  # kind ("probe" or "t<n>"), prompt file, snapshot flag
+  local kind=$1 pf=$2 snapshot=$3 pids=() p rc=0 r tag
+  for r in "${RUNGS[@]}"; do
+    if [ "$kind" = probe ]; then tag="probe$r"; else tag="run${r}_${kind}"; fi
+    one_session "$r" "$tag" "$pf" "$snapshot" & pids+=("$!")
+  done
+  for p in "${pids[@]}"; do wait "$p" || rc=1; done
+  return "$rc"
+}
+
 case "${1:-setup}" in
   setup) setup ;;
-  probe) for r in "${RUNGS[@]}"; do one_session "$r" "probe$r" "$PROBE_FILE" no & done; wait ;;
-  run)   for r in "${RUNGS[@]}"; do one_session "$r" "run${r}_t1" "$PROMPT_FILE" & done; wait ;;
-  trials) for t in $(seq "${FROM:-2}" "${2:-3}"); do
-            for r in "${RUNGS[@]}"; do one_session "$r" "run${r}_t${t}" "$PROMPT_FILE" & done; wait
+  probe) wave probe "$PROBE_FILE" no ;;
+  run)   wave t1 "$PROMPT_FILE" yes ;;
+  trials) rc=0
+          for t in $(seq "${FROM:-2}" "${2:-3}"); do
+            wave "t$t" "$PROMPT_FILE" yes || rc=1
             echo "=== wave $t complete ==="
-          done ;;
+          done
+          exit "$rc" ;;
   *) echo "usage: $0 {setup|probe|run|trials [n]}" >&2; exit 2 ;;
 esac

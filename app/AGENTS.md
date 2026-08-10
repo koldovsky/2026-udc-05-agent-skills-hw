@@ -10,6 +10,7 @@ TypeScript 5, Node 22, Vitest, esbuild — plain library, no framework.
 - Test: `npm test`
 - Typecheck: `npm run typecheck`
 - Build (bundle): `npm run build` → `dist/bundle.js`
+- Per-widget bundle cost: `npm run ablate` → JSON on stdout, builds in memory
 - Lint: not configured
 
 ## Architecture
@@ -59,9 +60,9 @@ when its trigger matches:
   memory when it is available.
 - `analyzing-bundle-size` — answers bundle-weight questions with measurements,
   not estimates: its `scripts/measure-bundle.mjs` runs `npm run build`, reads
-  the real `dist/bundle.js` (raw + gzip) and derives each widget's marginal
-  cost from ablation builds, guarded by a byte-for-byte check against the
-  shipped bundle. `--budget <bytes>` exits 1 when over. Interpreting the output
+  the real `dist/bundle.js` (raw + gzip) and gets each widget's marginal cost
+  from `npm run ablate`, guarded by a byte-for-byte check against the shipped
+  bundle. `--budget <bytes>` exits 1 when over. Interpreting the output
   (why marginals do not sum, before/after deltas, `[UNTRUSTED]`) lives in its
   `references/interpreting-results.md` — opened only when interpreting, not to
   run. Neither file quotes a byte count: the number must come from a run.

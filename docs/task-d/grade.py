@@ -35,7 +35,12 @@ def sh(cmd, cwd, timeout=300):
 def static_checks(src, tsrc, idx, ts_exists, test_exists):
     """Checks 1-10: everything decidable from the three files the agent wrote.
     Shared by rubric() (rung tree) and pertrial() (per-trial snapshot)."""
-    rel = re.findall(r'from "(\.[^"]+)"', src + tsrc)
+    # Every relative specifier the agent could have written: `from "…"` in the two
+    # widget files, plus the side-effect `import "./alert/alert.js";` it adds to
+    # widgets/index.ts — that form has no `from`, so collecting only the first
+    # pattern let a missing .js in the wiring line through while check 4 passed.
+    rel = re.findall(r'from "(\.[^"]+)"', src + tsrc) \
+        + re.findall(r'^\s*import\s+"(\.[^"]+)"\s*;?', idx, re.M)
     res = {}
     res["1 file at widgets/alert/alert.ts"] = ts_exists
     res["2 colocated alert.test.ts"] = test_exists

@@ -262,4 +262,6 @@ in `src/widgets/index.ts`, then the skill's `## Verify` block verbatim —
   directions without regression.
 
 The `toast` widget and the `badge` `success` tone were experiment artefacts and
-have been reverted; only `spinner` remains. `cd app && npm test` → 5 passed.
+have been reverted; only `spinner` remains. `cd app && npm test` → 6 passed
+(the sixth asserts `createSpinner` escapes an HTML-significant `label`, added
+after review).

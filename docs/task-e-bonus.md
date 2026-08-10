@@ -131,7 +131,7 @@ fifth) — before, or almost before, touching a file. P reaches it at call **9, 
 11, 3, 11** — median 10, after an `ls -R`, five `Read`s and a second `ls -a …
 .agents` to go looking:
 
-```
+```text
 runP_t1  (16 calls)                       runN_t1  (10 calls)
   1 Bash   ls -R <repo> | head -60          1 Skill  creating-widget    <- first call
   2 Read   AGENTS.md                        2 Bash   ls app/src/widgets/
@@ -175,6 +175,18 @@ linter flags that the eye misses:
 - **`mirror creating-widget: … feb974882484 | … feb974882484 IDENTICAL`** — the
   cost of Path 1 is a second copy that can drift silently. That is now a check with
   an exit code, wired into `AGENTS.md`'s verify list, not a promise to be careful.
+
+⚠️ **The `PASS` above is from the second version of the linter.** The first read
+frontmatter with a hand-rolled `key: value` parser, which is exactly the leniency
+Claude Code has and the strict paths do not — and it was hiding a real defect:
+`architecture-deep-dive`'s `description` contained `structure: architecture
+overviews`, and an unquoted YAML scalar may not contain `: `. PyYAML rejects that
+file outright (`mapping values are not allowed here`), so the skill would have
+failed on upload while linting clean here. `portlint.py` now parses with PyYAML
+when it is installed and with a strict built-in reader (duplicate keys, `: ` in
+unquoted scalars, malformed lines → `FAIL`) when it is not; both agree on all four
+directories. The description was reworded to use an em dash, and the run above is
+the re-run after that fix.
 
 ## The template's table, filled
 
@@ -250,4 +262,4 @@ byte-identical to `.agents/skills/creating-widget/`, plus the drift check in
 source file changed; every session ran in an isolated copy under a scratch lab
 directory and the working repo was only read. No `alert` widget is committed —
 `app/src/widgets/` still holds `badge` and `spinner`. `cd app && npm test` →
-**5 passed**; `python3 docs/task-e/portlint.py` → `PASS: 0 spec violation(s)`.
+**6 passed**; `python3 docs/task-e/portlint.py` → `PASS: 0 spec violation(s)`.

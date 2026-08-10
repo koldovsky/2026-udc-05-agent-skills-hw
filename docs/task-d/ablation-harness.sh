@@ -98,20 +98,46 @@ PY
   echo "ladder ready in $LAB"
 }
 
+# Prints why a trace is not a data point and exits 1; silent + 0 when it is one.
+# A truncated, empty or unparseable .jsonl counts as a failure — never as "the
+# agent chose to do nothing".
+trace_failure() {
+  python3 - "$1" <<'PY'
+import json, sys
+try:
+    lines = [l for l in open(sys.argv[1]).read().splitlines() if l.strip()]
+    last = json.loads(lines[-1])
+except (OSError, IndexError, ValueError) as e:
+    print(f"unreadable trace: {type(e).__name__}: {e}")
+    sys.exit(1)
+if last.get("type") != "result":
+    print(f"trace ends on a {last.get('type')!r} event, not a result — session was cut short")
+    sys.exit(1)
+if last.get("is_error"):
+    print(last.get("result") or "result event flagged is_error with no text")
+    sys.exit(1)
+PY
+}
+
 one_run() {  # rung, output tag
-  local r=$1 tag=$2 d="$LAB/run$1"
+  local r=$1 tag=$2 d="$LAB/run$1" status=0 why
   git -C "$d" reset -q --hard && git -C "$d" clean -qfd
   (cd "$d" && claude -p "$(cat "$PROMPT_FILE")" --output-format stream-json --verbose \
-      --allowedTools "${ALLOWED[@]}" > "$LAB/$tag.jsonl" 2> "$LAB/$tag.err")
+      --allowedTools "${ALLOWED[@]}" > "$LAB/$tag.jsonl" 2> "$LAB/$tag.err") || status=$?
   # A session that died on an API/limit error is not a data point. Mark it and
   # bail, so it cannot be silently counted as "the agent chose to do nothing".
-  if python3 -c "import json,sys;l=open(sys.argv[1]).read().splitlines();\
-sys.exit(0 if l and json.loads(l[-1]).get('is_error') else 1)" "$LAB/$tag.jsonl" 2>/dev/null; then
-    python3 -c "import json,sys;print(json.loads(open(sys.argv[1]).read().splitlines()[-1]).get('result'))" \
-        "$LAB/$tag.jsonl" > "$LAB/FAILED_$tag.txt"
+  # Both halves matter: claude's own exit code, and the trace it left behind.
+  if [ "$status" -ne 0 ]; then
+    { echo "claude exited $status"; tail -20 "$LAB/$tag.err"; } > "$LAB/FAILED_$tag.txt"
+    echo "$tag FAILED (claude exited $status; see FAILED_$tag.txt) — rerun this trial"
+    return 1
+  fi
+  if ! why=$(trace_failure "$LAB/$tag.jsonl"); then
+    printf '%s\n' "$why" > "$LAB/FAILED_$tag.txt"
     echo "$tag FAILED (see FAILED_$tag.txt) — rerun this trial"
     return 1
   fi
+  rm -f "$LAB/FAILED_$tag.txt"
   mkdir -p "$LAB/snap/$tag"
   cp "$d"/app/src/widgets/alert/alert*.ts "$LAB/snap/$tag/" 2>/dev/null
   cp "$d"/app/src/widgets/index.ts "$LAB/snap/$tag/" 2>/dev/null
@@ -123,12 +149,24 @@ sys.exit(0 if l and json.loads(l[-1]).get('is_error') else 1)" "$LAB/$tag.jsonl"
   echo "$tag done"
 }
 
+# A wave waits on each PID individually: bare `wait` returns 0 whatever the
+# background jobs did, which would hide a failed trial in the harness exit code.
+wave() {  # trial suffix, rungs...
+  local suffix=$1 pids=() p rc=0 r
+  shift
+  for r in "$@"; do one_run "$r" "run${r}_${suffix}" & pids+=("$!"); done
+  for p in "${pids[@]}"; do wait "$p" || rc=1; done
+  return "$rc"
+}
+
 case "${1:-setup}" in
   setup)  setup ;;
-  run)    for r in A B C D E; do one_run "$r" "run${r}_t1" & done; wait ;;
-  trials) for t in $(seq 2 "${2:-5}"); do
-            for r in A B E; do one_run "$r" "run${r}_t${t}" & done; wait
+  run)    wave t1 A B C D E ;;
+  trials) rc=0
+          for t in $(seq 2 "${2:-5}"); do
+            wave "t$t" A B E || rc=1
             echo "=== wave $t complete ==="
-          done ;;
+          done
+          exit "$rc" ;;
   *) echo "usage: $0 {setup|run|trials [n]}" >&2; exit 2 ;;
 esac

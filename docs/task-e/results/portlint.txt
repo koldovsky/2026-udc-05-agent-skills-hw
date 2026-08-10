@@ -1,13 +1,13 @@
 
 === .agents/skills/analyzing-bundle-size  OK
   INFO  description 401/1024 chars
-  INFO  body 70 lines, ~855 tokens
+  INFO  body 72 lines, ~875 tokens
   INFO  bundled reference references/interpreting-results.md
   INFO  bundled reference scripts/measure-bundle.mjs
-  NOTE  2 path(s) outside the skill dir — the skill assumes this repo's layout: app/dist/bundle.js, app/src/widgets/index.ts
+  NOTE  3 path(s) outside the skill dir — the skill assumes this repo's layout: app/dist/bundle.js, app/scripts/ablate.mjs, app/src/widgets/index.ts
 
 === .agents/skills/architecture-deep-dive  OK
-  INFO  description 412/1024 chars
+  INFO  description 413/1024 chars
   INFO  body 72 lines, ~978 tokens
   INFO  bundled reference references/architecture.md
 

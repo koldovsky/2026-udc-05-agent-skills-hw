@@ -17,4 +17,15 @@ describe("createSpinner", () => {
       '<span class="spinner spinner--lg" role="status" aria-label="Uploading"></span>',
     );
   });
+
+  it("escapes HTML-significant characters in the label", () => {
+    expect(createSpinner({ label: `" onmouseover="x` })).toBe(
+      '<span class="spinner spinner--md" role="status" ' +
+        'aria-label="&quot; onmouseover=&quot;x"></span>',
+    );
+    expect(createSpinner({ label: "Tom & <b>Jerry</b>'s" })).toBe(
+      '<span class="spinner spinner--md" role="status" ' +
+        'aria-label="Tom &amp; &lt;b&gt;Jerry&lt;/b&gt;&#39;s"></span>',
+    );
+  });
 });

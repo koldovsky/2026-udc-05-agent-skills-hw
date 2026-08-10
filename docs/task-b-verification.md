@@ -195,7 +195,7 @@ of plausible-but-wrong detail the reference exists to keep out.
 
 The skill directory and both `AGENTS.md` files were restored after the control
 run; `git status` shows only the intended Task B changes. `cd app && npm test` →
-5 passed, `npm run typecheck` clean. No `app/src/` file was touched by this task.
+6 passed, `npm run typecheck` clean. No `app/src/` file was touched by this task.
 
 The ledger audit's scratch files (the `tsc` probe, the duplicate-registration
 entry, the badge-only bundle) were written outside `app/src/` and deleted after

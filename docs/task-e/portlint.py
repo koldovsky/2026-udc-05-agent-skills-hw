@@ -19,6 +19,11 @@ Anything outside those six loads fine in Claude Code and fails hard elsewhere:
     Allowed properties are: allowed-tools, compatibility, description, license,
     metadata, name
 
+Frontmatter is parsed the way a receiving tool parses it — PyYAML when installed,
+otherwise a strict built-in reader that rejects the same things (duplicate keys,
+`: ` inside an unquoted scalar). A lenient hand-rolled parser would hide exactly
+the breakage this file is looking for.
+
 FAIL = breaks the spec. WARN = still loads, but costs portability (absolute paths,
 Claude Code-only `${CLAUDE_*}` substitutions, dangling relative references,
 oversized body). NOTE = a dependency on a file outside the skill directory: legal,
@@ -30,6 +35,11 @@ invisible to the linter's judgement, but it does not travel when the folder does
 Exit code: 1 if any FAIL, else 0.
 """
 import hashlib, pathlib, re, sys
+
+try:                        # the system python3 does not ship PyYAML; see frontmatter()
+    import yaml
+except ImportError:
+    yaml = None
 
 SPEC_FIELDS = {"name", "description", "license", "compatibility", "metadata", "allowed-tools"}
 NAME_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")     # also rejects -x, x- and x--y
@@ -45,25 +55,79 @@ HAZARDS = [
 ]
 
 
-def frontmatter(text):
-    """Minimal YAML front-matter reader: top-level `key: value` plus indented
-    blocks. Enough for the six spec fields; no dependency on PyYAML, which the
-    system python3 does not ship."""
-    m = re.match(r"^---\n(.*?)\n---\n(.*)$", text, re.S)
-    if not m:
-        return None, text
-    fm, body, key = {}, m.group(2), None
-    for line in m.group(1).splitlines():
+class FrontmatterError(Exception):
+    """Frontmatter a spec-compliant loader would refuse. Claude Code's reader is
+    lenient; claude.ai upload, the Skills API and package_skill.py are not, so
+    "it loads here" says nothing about whether it travels."""
+
+
+def _parse_yaml(block):
+    """PyYAML in safe mode, with duplicate keys promoted to errors — plain
+    `yaml.safe_load` keeps the last one silently, and which one wins is exactly
+    the kind of thing that differs between loaders."""
+    class NoDuplicates(yaml.SafeLoader):
+        pass
+
+    def mapping(loader, node, deep=False):
+        seen = set()
+        for key_node, _ in node.value:
+            key = loader.construct_object(key_node, deep=deep)
+            if key in seen:
+                raise FrontmatterError(f"duplicate key {key!r}")
+            seen.add(key)
+        return yaml.SafeLoader.construct_mapping(loader, node, deep)
+
+    NoDuplicates.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, mapping)
+    try:
+        data = yaml.load(block, Loader=NoDuplicates)
+    except yaml.YAMLError as exc:
+        raise FrontmatterError(f"invalid YAML: {str(exc).splitlines()[0]}") from exc
+    return data
+
+
+def _parse_minimal(block):
+    """Fallback for a python without PyYAML: top-level `key: value` plus indented
+    continuation lines. Deliberately strict — a line it cannot account for is an
+    error, not a line to drop, and the two YAML rules a hand-written SKILL.md
+    trips over most (duplicate keys, `: ` inside an unquoted value) are checked
+    explicitly, because a real loader rejects both."""
+    fm, key = {}, None
+    for n, line in enumerate(block.splitlines(), 1):
         if not line.strip() or line.lstrip().startswith("#"):
             continue
         if line[0].isspace():                       # nested under the previous key
-            if key:
-                fm[key] = (fm[key] or "") + " " + line.strip()
+            if key is None:
+                raise FrontmatterError(f"line {n}: indented line before any key")
+            fm[key] = (fm[key] or "") + " " + line.strip()
             continue
-        k, _, v = line.partition(":")
-        key = k.strip()
-        fm[key] = v.strip()
-    return fm, body
+        k, sep, v = line.partition(":")
+        if not sep or not k.strip():
+            raise FrontmatterError(f"line {n}: not a `key: value` pair: {line.strip()!r}")
+        key, v = k.strip(), v.strip()
+        if key in fm:
+            raise FrontmatterError(f"line {n}: duplicate key {key!r}")
+        if v[:1] not in {'"', "'", "|", ">", "[", "{", ""} and ": " in v:
+            raise FrontmatterError(
+                f"line {n}: key {key!r} — an unquoted YAML scalar may not contain "
+                "': '; quote the value or replace the colon")
+        fm[key] = v
+    return fm
+
+
+def frontmatter(text):
+    """(mapping, body) for the `--- … ---` block, parsed the way a receiving tool
+    would: PyYAML when it is installed, otherwise the strict reader above.
+    Returns (None, text) when there is no block; raises FrontmatterError when the
+    block exists but is not valid."""
+    m = re.match(r"^---\n(.*?)\n---\n(.*)$", text, re.S)
+    if not m:
+        return None, text
+    fm = _parse_yaml(m.group(1)) if yaml else _parse_minimal(m.group(1))
+    if fm is None:
+        fm = {}
+    if not isinstance(fm, dict):
+        raise FrontmatterError(f"frontmatter must be a mapping, got {type(fm).__name__}")
+    return fm, m.group(2)
 
 
 def lint(skill_dir):
@@ -72,9 +136,21 @@ def lint(skill_dir):
     md = sd / "SKILL.md"
     if not md.exists():
         return [("FAIL", f"no SKILL.md in {sd}")]
-    fm, body = frontmatter(md.read_text())
+    try:
+        fm, body = frontmatter(md.read_text())
+    except FrontmatterError as exc:
+        return [("FAIL", f"frontmatter does not parse as YAML: {exc}")]
     if fm is None:
         return [("FAIL", "no YAML frontmatter delimited by --- ... ---")]
+
+    # A loader hands back whatever type the YAML said; the spec's string fields
+    # must actually be strings, and the checks below assume it.
+    for key in ("name", "description", "license", "compatibility"):
+        if key in fm and not isinstance(fm[key], str):
+            out.append(("FAIL", f"{key} must be a string, got {type(fm[key]).__name__}"))
+            del fm[key]
+    if "metadata" in fm and not isinstance(fm["metadata"], dict):
+        out.append(("FAIL", f"metadata must be a map, got {type(fm['metadata']).__name__}"))
 
     name = fm.get("name")
     if not name:
@@ -101,7 +177,10 @@ def lint(skill_dir):
 
     extra = set(fm) - SPEC_FIELDS
     if extra:
-        out.append(("WARN", f"non-spec frontmatter {sorted(extra)} — loads in Claude Code, "
+        # FAIL, not WARN: these load in Claude Code and are a hard error everywhere
+        # else, so a skill carrying them does not travel — which is what this
+        # linter is for.
+        out.append(("FAIL", f"non-spec frontmatter {sorted(extra)} — loads in Claude Code, "
                             "hard error on claude.ai upload / Skills API / package_skill.py"))
     if "compatibility" in fm and len(fm["compatibility"]) > 500:
         out.append(("FAIL", "compatibility exceeds 500 chars"))
