@@ -35,6 +35,11 @@ entry point is `src/index.ts`.
 - `src/core/registry.ts` is the shared contract every widget depends on —
   changes there affect all widgets; keep its public API (`register`, `create`,
   `listWidgets`) stable.
+- Widget factories interpolate props into HTML **unescaped** — the contract is
+  that `create()` receives trusted, already-escaped text. Keep new widgets
+  consistent with that; if the library ever needs to accept untrusted input,
+  escaping is a `core/registry.ts` concern applied to every widget, not a
+  per-widget patch. See the `architecture-deep-dive` skill.
 
 ## Skills
 

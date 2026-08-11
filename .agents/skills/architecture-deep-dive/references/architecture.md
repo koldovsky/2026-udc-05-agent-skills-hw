@@ -17,7 +17,7 @@ Files covered: `app/src/core/registry.ts`, `app/src/widgets/index.ts`,
 
 Four layers, each depending only on the one below it:
 
-```
+```text
 app/src/index.ts            bundle entry — re-exports create, listWidgets
         ↓
 app/src/widgets/index.ts    barrel — side-effect imports + public re-export
@@ -135,6 +135,43 @@ is in the bundle** — the registry map is reachable from the entry, so nothing
 tree-shakes away. Practical consequence: bundle size grows with each widget
 added, which is what the `analyzing-bundle-size` skill measures.
 
+### HTML escaping: a deliberate gap in the contract
+
+Every widget factory interpolates props straight into its HTML string with no
+escaping — `badge.ts` returns
+`` `<span class="badge badge--${tone}">${props.label}</span>` `` and the
+seeded `alert` widget mirrors it. There is no `escapeHtml` anywhere in the
+codebase, verified by search.
+
+**The current contract is therefore: `create()` receives trusted,
+already-escaped text.** A `label` of `<img onerror=…>` is emitted verbatim; if
+a consumer assigns the result to `innerHTML` with user-supplied content, that
+is an XSS sink. Nothing in the library prevents it.
+
+This is worth understanding rather than "fixing" locally:
+
+- **Escaping is a cross-cutting concern, not a widget concern.** Adding an
+  escape call inside one factory makes that widget's contract silently differ
+  from every other widget's — a reader can no longer assume the pattern holds,
+  which is a worse failure than a uniform, documented gap.
+- **The right home is `core/registry.ts`** — e.g. `create()` escaping props
+  before handing them to the factory, or the library exporting an `escapeHtml`
+  helper that every factory is required to use. Either way it applies to all
+  widgets at once.
+- **It is a protected-contract change.** `register` / `create` / `listWidgets`
+  signatures are stable by rule (`app/AGENTS.md`), and escaping inside
+  `create()` would change its observable behaviour for every existing caller.
+  Raise it as an explicit decision with tests, don't slip it into an unrelated
+  task.
+- **Escaping is not free or universal.** A widget that legitimately composes
+  HTML from another widget's output (nesting `create()` results) would break
+  under blanket escaping. Any real fix needs a way to mark trusted HTML —
+  which is exactly why this belongs in a design discussion, not a one-line
+  patch.
+
+Until that decision is made, treat the unescaped interpolation as the
+documented status quo and keep new widgets consistent with it.
+
 ### Where does a change belong?
 
 - **New widget** → `app/src/widgets/<name>/` + barrel import. Cheap, additive,
@@ -167,6 +204,9 @@ added, which is what the `analyzing-bundle-size` skill measures.
    rather than inventing one.
 6. **Adding a framework or a dependency** — explicitly out of bounds per
    `app/AGENTS.md`; the string-returning design exists to avoid both.
+7. **Assuming widget output is safe to inject** — it is not escaped. See
+   "HTML escaping: a deliberate gap in the contract" above before rendering
+   widget output that contains user-supplied text.
 
 ## Related
 

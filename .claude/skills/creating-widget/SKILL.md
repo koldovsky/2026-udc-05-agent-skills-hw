@@ -40,6 +40,9 @@ export interface SpinnerProps extends WidgetProps {
 
 export function createSpinner(props: SpinnerProps): string {
   const size = props.size ?? "md";
+  // NB: props are interpolated unescaped — the library's contract is that
+  // callers pass trusted text. See "HTML escaping" below before reusing this
+  // with untrusted input.
   return `<span class="spinner spinner--${size}">${props.label}</span>`;
 }
 
@@ -61,6 +64,23 @@ Rules this encodes:
   `"type": "module"`); TypeScript is strict, so no `any` and no `@ts-ignore`.
 - `register(name, …)` throws if `name` is already taken — one registration per
   widget name, and the name is the kebab-case widget name as a plain string.
+
+**HTML escaping — know the contract before you copy the example.** Widget
+factories in this library interpolate props into the HTML string **without
+escaping** (see `badge.ts`, and the `createSpinner` example above). The
+library's contract is that `create()` receives **trusted, already-escaped
+text**. Consequences:
+
+- Follow the pattern for consistency, but do **not** treat it as safe for
+  untrusted input. A `label` containing `<script>` renders as raw HTML if the
+  caller injects the result via `innerHTML`.
+- Do **not** add an escape helper to a single widget — that silently makes one
+  widget's contract differ from every other one's, which is worse than the
+  uniform status quo.
+- If the library must handle untrusted input, escaping belongs in
+  `core/registry.ts` as a **shared concern applied to every widget**. That is a
+  change to a protected contract: use the `architecture-deep-dive` skill and
+  raise it explicitly rather than deciding it inside a widget task.
 
 ### 2. `app/src/widgets/<name>/<name>.test.ts`
 

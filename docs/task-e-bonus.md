@@ -26,7 +26,7 @@
 `scripts/` спрацювали без змін. Єдине, що довелося змінити, — **де лежить
 тека**; звичайне копіювання, без правок:
 
-```
+```text
 .agents/skills/creating-widget/SKILL.md   ← крос-tool конвенція
 .claude/skills/creating-widget/SKILL.md   ← рідний шлях Claude Code
 ```
