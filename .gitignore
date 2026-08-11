@@ -35,4 +35,4 @@ nul
 # Local agent state (settings, worktrees) — but DO commit .claude/skills/,
 # it's the optional cross-tool skill mirror from Task E.
 .claude/*
-!.claude/skills/
+!.agents/skills/
