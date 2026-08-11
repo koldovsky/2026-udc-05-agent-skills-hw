@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Widget harness — Task E (webapp-testing)</title>
+<style>
+  /* The library ships markup only and no stylesheet on purpose, so the
+     classes below exist nowhere in app/src — the harness supplies them. */
+  body { font: 15px/1.5 system-ui, sans-serif; margin: 2rem; background: #fff; color: #111; }
+  h1 { font-size: 1.1rem; }
+  .case { margin: 1rem 0; padding: .75rem 1rem; border: 1px solid #ddd; border-radius: 6px; }
+  .case-name { font: 12px monospace; color: #666; margin-bottom: .5rem; }
+
+  .badge { display: inline-block; padding: .15em .6em; border-radius: 999px; font-size: .8em; color: #fff; }
+  .badge--info { background: #2563eb; }
+  .badge--warn { background: #d97706; }
+  .badge--error { background: #dc2626; }
+
+  .alert { padding: .6em .9em; border-radius: 4px; border-left: 4px solid; }
+  .alert--info { background: #eff6ff; border-color: #2563eb; }
+  .alert--warn { background: #fffbeb; border-color: #d97706; }
+  .alert--error { background: #fef2f2; border-color: #dc2626; }
+
+  .spinner { display: inline-block; border: 2px solid #ccc; border-top-color: #2563eb;
+             border-radius: 50%; animation: spin .8s linear infinite; }
+  .spinner--sm { width: 12px; height: 12px; }
+  .spinner--md { width: 20px; height: 20px; }
+  .spinner--lg { width: 32px; height: 32px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<h1>Widget harness</h1>
+<p id="registered">loading…</p>
+<div id="cases"></div>
+
+<script type="module">
+  // Imports the real build output, not the TS source — so this page renders
+  // exactly what `npm run build` produces.
+  import { create, listWidgets } from "/app/dist/bundle.js";
+
+  const names = listWidgets();
+  document.getElementById("registered").textContent = `registered: ${names.join(", ")}`;
+  document.getElementById("registered").dataset.count = String(names.length);
+  console.log("[harness] listWidgets ->", names.join(", "));
+
+  const cases = [
+    ["badge",   { label: "stable", tone: "info" }],
+    ["badge",   { label: "deprecated", tone: "warn" }],
+    ["alert",   { message: "Build finished", tone: "info" }],
+    ["alert",   { message: "Bundle grew by 8%", tone: "warn" }],
+    ["spinner", { size: "sm", label: "Loading small" }],
+    ["spinner", { size: "lg", label: "Loading large" }],
+  ];
+
+  const host = document.getElementById("cases");
+  for (const [name, props] of cases) {
+    const box = document.createElement("div");
+    box.className = "case";
+    box.dataset.widget = name;
+    const caption = document.createElement("div");
+    caption.className = "case-name";
+    caption.textContent = `create("${name}", ${JSON.stringify(props)})`;
+    const slot = document.createElement("div");
+    // Marks the create() output itself, so a check can tell "the factory
+    // returned markup" apart from "the harness built a box around nothing".
+    slot.className = "widget-output";
+    slot.innerHTML = create(name, props);
+    box.append(caption, slot);
+    host.append(box);
+    console.log(`[harness] rendered ${name}`);
+  }
+
+  // The registry throws on an unregistered name; render that path too so the
+  // browser run also covers the unregistered-name branch, not just the happy one.
+  try {
+    create("tooltip", {});
+  } catch (err) {
+    console.error("[harness] expected throw:", err.message);
+    const box = document.createElement("div");
+    box.className = "case";
+    box.dataset.widget = "tooltip-missing";
+    box.innerHTML = `<div class="case-name">create("tooltip", {}) — expected to throw</div>
+                     <div class="alert alert--error">${err.message}</div>`;
+    host.append(box);
+  }
+
+  document.body.dataset.ready = "true";
+</script>
+</body>
+</html>

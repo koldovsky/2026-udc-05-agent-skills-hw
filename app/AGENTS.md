@@ -36,4 +36,31 @@ entry point is `src/index.ts`.
   changes there affect all widgets; keep its public API (`register`, `create`,
   `listWidgets`) stable.
 
-<!-- Task A adds a "## Skills" section here pointing at .agents/skills/ -->
+## Skills
+
+Reusable, tool-agnostic instructions live in `.agents/skills/<name>/SKILL.md` at
+the repo root. Load one when its trigger matches — the description in each
+skill's frontmatter says when.
+
+- **`creating-widget`** — the golden path for adding a new widget: the
+  `src/widgets/<name>/` folder, the pure `create<Name>` factory and its
+  `register()` call, the colocated `<name>.test.ts`, and the
+  `src/widgets/index.ts` side-effect import. Reach for it on any "add a
+  widget/component" request.
+- **`architecture-deep-dive`** — explains the registry contract and the module
+  boundaries between `core/`, `widgets/`, and the entry point, with the depth in
+  `references/architecture.md`. Reach for it on "how does this work" or "where
+  should this feature live" questions.
+- **`analyzing-bundle-size`** — runs the real `npm run build` and reports the
+  actual `dist/bundle.js` byte size instead of estimating it, via
+  `scripts/measure-bundle.mjs`. Reach for it when asked about bundle weight or a
+  change's size impact — never answer those from an estimate.
+
+Also installed, but **not** part of this library's golden path:
+
+- **`webapp-testing`** — third-party skill vendored verbatim from
+  [anthropics/skills](https://github.com/anthropics/skills) for Task E. Drives a
+  headless browser via Playwright. This library renders nothing on its own, so
+  it only applies through the Task E harness (`docs/task-e/`), which serves the
+  built bundle and screenshots it. Not needed for ordinary widget work — `npm
+  test` remains the check that matters. See `docs/task-e-bonus.md`.
