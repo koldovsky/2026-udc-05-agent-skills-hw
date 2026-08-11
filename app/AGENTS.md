@@ -37,3 +37,9 @@ entry point is `src/index.ts`.
   `listWidgets`) stable.
 
 <!-- Task A adds a "## Skills" section here pointing at .agents/skills/ -->
+
+## Skills
+
+* `creating-widget` — use when adding a new widget; defines the required widget structure, registration, colocated tests, and index import.
+* `architecture-deep-dive` — use when explaining the project architecture, module boundaries, registry flow, or deciding where a feature belongs.
+* `analyzing-bundle-size — use when reporting the current bundle size or evaluating the bundle-size impact of a change.
