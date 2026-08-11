@@ -36,4 +36,13 @@ entry point is `src/index.ts`.
   changes there affect all widgets; keep its public API (`register`, `create`,
   `listWidgets`) stable.
 
-<!-- Task A adds a "## Skills" section here pointing at .agents/skills/ -->
+## Skills
+
+Agent skills for this repo live in `../.agents/skills/`. Load one when its
+description matches the task at hand:
+
+- **creating-widget** — the golden path for adding a new widget: a pure
+  `create<Name>(props)` factory + `register()` call in
+  `src/widgets/<name>/<name>.ts`, a colocated `<name>.test.ts`, and an import
+  wired into `src/widgets/index.ts`. Use whenever asked to add, create, or
+  scaffold a new widget/component for this library.
