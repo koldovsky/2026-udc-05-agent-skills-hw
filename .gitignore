@@ -36,3 +36,7 @@ nul
 # it's the optional cross-tool skill mirror from Task E.
 .claude/*
 !.claude/skills/
+# ...and the same path without the trailing slash: here .claude/skills is a
+# symlink to .agents/skills (the canonical location), and git records a symlink
+# as a file, which the directory-only negation above would not re-include.
+!.claude/skills
