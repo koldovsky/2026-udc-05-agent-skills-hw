@@ -4,15 +4,20 @@
 // wraps and reports on, not a production bundler setup.
 import { build } from "esbuild";
 import { statSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, resolve } from "node:path";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 await build({
-  entryPoints: ["src/index.ts"],
+  entryPoints: [resolve(__dirname, "../src/index.ts")],
   bundle: true,
   minify: true,
   format: "esm",
-  outfile: "dist/bundle.js",
+  outfile: resolve(__dirname, "../dist/bundle.js"),
   platform: "neutral",
+  loader: { ".ts": "ts" },
 });
 
-const { size } = statSync("dist/bundle.js");
+const { size } = statSync(resolve(__dirname, "../dist/bundle.js"));
 console.log(`dist/bundle.js — ${size} bytes`);

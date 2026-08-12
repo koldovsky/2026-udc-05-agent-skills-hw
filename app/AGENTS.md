@@ -12,6 +12,12 @@ TypeScript 5, Node 22, Vitest, esbuild — plain library, no framework.
 - Build (bundle): `npm run build` → `dist/bundle.js`
 - Lint: not configured
 
+## Skills
+
+- Creating-widget: A skill which create a new widget using .agents/skills/creating-widget/SKILL.md
+- Deep dive architecture: A skill which explain architecture .agents/skills/architecture-deep-dive/SKILL.md
+- Analyse bundle size: A skill which analyse bundle size using .agents/skills/analyzing-bundle-size/SKILL.md
+
 ## Architecture
 
 A tiny widget registry (`src/core/registry.ts`): `register(name, factory)` /
