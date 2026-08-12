@@ -12,6 +12,7 @@ This widget reference explains architecture of registry.ts file and purpose of i
      (app/src/core/registry.ts, app/src/widgets/**) and real function
      signatures — a reference file is only valuable if it's verifiably
      accurate against the current code, not a generic architecture essay. -->
+
 ### State Isolation & Type Safety
 The registry encapsulates its state within a private `widgets` `Map` (`app/src/core/registry.ts`). This map is strictly isolated from direct external mutation and is accessible exclusively through the exported public API.
 * **Generic Constraint:** `WidgetFactory<P>` enforces that every component remains a pure function mapping a `WidgetProps` shape (`Record<string, unknown>`) to a raw HTML `string`.

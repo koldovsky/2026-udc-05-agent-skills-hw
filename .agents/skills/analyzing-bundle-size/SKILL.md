@@ -1,13 +1,11 @@
 ---
 name: Analyse bundle size
-description: Run this skill when explicitly requested by text bundle size or about bundle size change if anything or equivalent 
-  changed in the logic/code
+description: Run this skill when the user explicitly asks to analyze bundle size or bundle size changes
 ---
 
 # Skill Analyse bundle size
 
-Run this skill when user explicitly requested to get to know bundle size or about bundle size change if anything or equivalent
-changed in the logic/code
+Run this skill when the user explicitly asks to analyze bundle size or bundle size changes
 
 ## When to use this
 

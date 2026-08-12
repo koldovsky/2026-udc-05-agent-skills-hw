@@ -20,19 +20,36 @@ When the user asks to create a new widget
 
 ## Instructions
 
-<!-- The actual step-by-step expertise. Be concrete: real file paths, real
-     function names, real constraints from materials/architecture-brief.md.
-     Avoid vague advice a generic model would already produce unprompted —
-     a skill should encode something PROJECT-SPECIFIC. -->
-Use goldenpath steps for widget creation using name provided by user from /materials/architecture-brief.md
+Follow the **golden path** in `/materials/architecture-brief.md` (lines 31–36). Use `app/src/widgets/badge/` as the canonical example for all three steps: factory file, test file, and wiring into `app/src/widgets/index.ts`.
 
 ## Verify
 
-<!-- How the agent (or you) confirms the skill was followed correctly, e.g.
-     "cd app && npm test", "grep for register( in the new file". -->
+1. **Factory file exists** at `app/src/widgets/<name>/<name>.ts` with:
+   - Pure function `create<Name>()` defined
+   - `register("<name>", create<Name>)` call present
+   ```bash
+   grep -l "register(" app/src/widgets/<name>/<name>.ts
+   ```
 
-Verify that new folder was created in widget folder and new *.ts file exist using grep command on file system 
-Also run cd app && npm test to verify that app works
+2. **Props interface exists** (check the factory file has a props type extending `WidgetProps`):
+   ```bash
+   grep "extends WidgetProps" app/src/widgets/<name>/<name>.ts
+   ```
+
+3. **Test file exists** at `app/src/widgets/<name>/<name>.test.ts`:
+   ```bash
+   test -f app/src/widgets/<name>/<name>.test.ts && echo "Test file exists"
+   ```
+
+4. **Widget is wired into bundle** — import exists in `app/src/widgets/index.ts`:
+   ```bash
+   grep "import.*<name>/<name>.js" app/src/widgets/index.ts
+   ```
+
+5. **Tests pass and bundle builds**:
+   ```bash
+   cd app && npm test && npm run build
+   ```
 <!--
 Optional, only if this skill has them (see the other two task templates):
 ## References
