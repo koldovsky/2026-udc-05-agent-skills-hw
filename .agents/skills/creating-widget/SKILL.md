@@ -27,26 +27,31 @@ Follow the **golden path** in `/materials/architecture-brief.md` (lines 31–36)
 1. **Factory file exists** at `app/src/widgets/<name>/<name>.ts` with:
    - Pure function `create<Name>()` defined
    - `register("<name>", create<Name>)` call present
+
    ```bash
    grep -l "register(" app/src/widgets/<name>/<name>.ts
    ```
 
 2. **Props interface exists** (check the factory file has a props type extending `WidgetProps`):
+
    ```bash
    grep "extends WidgetProps" app/src/widgets/<name>/<name>.ts
    ```
 
 3. **Test file exists** at `app/src/widgets/<name>/<name>.test.ts`:
+
    ```bash
    test -f app/src/widgets/<name>/<name>.test.ts && echo "Test file exists"
    ```
 
 4. **Widget is wired into bundle** — import exists in `app/src/widgets/index.ts`:
+
    ```bash
    grep "import.*<name>/<name>.js" app/src/widgets/index.ts
    ```
 
 5. **Tests pass and bundle builds**:
+
    ```bash
    cd app && npm test && npm run build
    ```

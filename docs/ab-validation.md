@@ -7,7 +7,7 @@
 
 ## Result A — skill available
 
-AI produced correct files in widgets folder: alert.ts and alert.test.ts
+AI produced correct files in widgets folder: app/src/widgets/alert/alert.ts and app/src/widgets/alert/alert.test.ts
 AI updated index.ts file
 
 ## Result B — skill removed
@@ -17,12 +17,12 @@ When skill was removed files where generated in wrong folder, registration was m
 ## Difference table
 
 | Aspect | A (skill available)      | B (skill removed) |
-|---|--------------------------|-------------------|
-| File location | `widgets/alert/alert.ts` | `core/alert.ts`>  |
-| Registered via `register()` | yes                      | no                |
-| Colocated test added | yes                      | yes               |
-| Wired into `widgets/index.ts` | yes                      | forgotten         |
-| Named exports / no `any` | yes                      | default export    |
+|---|--------------------------|------------------|
+| File location | `widgets/alert/alert.ts` | `core/alert.ts`  |
+| Registered via `register()` | yes                      | no               |
+| Colocated test added | yes                      | yes              |
+| Wired into `widgets/index.ts` | yes                      | forgotten        |
+| Named exports / no `any` | yes                      | default export   |
 
 ## Conclusion
 
