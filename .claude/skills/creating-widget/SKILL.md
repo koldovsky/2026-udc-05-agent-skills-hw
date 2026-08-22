@@ -43,6 +43,31 @@ example; mirror it exactly.
    `app/src/widgets/index.ts` — without this the `register()` call never runs
    and `create("<name>", ...)` throws at runtime.
 
+4. **Add a registration test case.** The colocated test imports the factory
+   *directly*, so it stays green even if you forget step 3 — nothing in the
+   suite would catch an unregistered widget. Close that hole: add a case for
+   your widget to `app/src/widgets/registration.test.ts` (create the file if
+   it doesn't exist yet) that goes **through the registry**, not the factory:
+
+   ```ts
+   import { describe, expect, it } from "vitest";
+   import { create, listWidgets } from "./index.js";
+
+   describe("widget registration", () => {
+     it("registers <name> so it is reachable by name", () => {
+       expect(listWidgets()).toContain("<name>");
+       expect(create("<name>", { /* minimal required props */ })).toBe(
+         "<expected html string>",
+       );
+     });
+   });
+   ```
+
+   Do NOT import `node:fs`/`node:path` here to auto-scan folders —
+   `@types/node` is not a devDependency of `app/`, so that fails
+   `npm run typecheck` (and adding the dependency violates the repo's
+   no-new-deps guardrail). Explicit per-widget cases only.
+
 Template (replace `alert`/`Alert` with your widget's name):
 
 ```ts
@@ -70,4 +95,10 @@ register("alert", createAlert);
   top-level `register("<name>", ...)` call.
 - `grep -n "<name>" app/src/widgets/index.ts` — the widget module is imported
   so registration runs.
+- `app/src/widgets/registration.test.ts` has a case for the new widget — this
+  is the only test that fails if the `widgets/index.ts` import is forgotten.
 - No changes to `app/src/core/registry.ts`.
+- Optional cross-check: `node
+  .agents/skills/analyzing-bundle-size/scripts/measure-bundle.mjs` — the
+  bundle must GROW after adding a widget; an unchanged size means the
+  `widgets/index.ts` import is missing (the bundle is a registration canary).

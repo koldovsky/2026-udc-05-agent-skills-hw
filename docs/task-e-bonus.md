@@ -16,10 +16,12 @@ exercised through **two different discovery mechanisms**:
   session** (`claude -p`, new context, no hints), where the harness itself
   lists project skills from `.claude/skills/` in the Skill tool.
 
-*Honesty note: only Claude Code was installed in this environment, so this
-compares the two discovery mechanisms/locations rather than two separate IDE
-products — which is exactly what the copy-into-`.claude/skills/` variant of
-Path 1 tests.*
+*Honesty note / known limitation: only Claude Code was installed in this
+environment — no second IDE (Cursor, Copilot, Windsurf) was available to run —
+so this deliberately compares the two discovery mechanisms/locations rather
+than two separate IDE products, which is exactly what the
+copy-into-`.claude/skills/` variant of Path 1 tests. A run in a genuinely
+different product would strengthen the claim and is the natural follow-up.*
 
 **Tools compared:** Claude Code via `.agents/skills/` file-convention
 discovery vs. Claude Code (fresh CLI session) via native `.claude/skills/`
@@ -42,3 +44,15 @@ sandbox), not skill-format-related. Progressive disclosure held up too: the
 fresh session saw only the description until the widget request triggered a
 full load. (The `spinner` widget from run 2 was reverted afterwards — the
 committed code change in this PR is the `alert` widget from Task D.)
+
+**Tradeoff of copying over symlinking:** the two locations are independent
+files, so an edit to one silently diverges the other and would quietly
+invalidate this portability claim. After any skill edit, re-sync and verify:
+
+```bash
+cp .agents/skills/creating-widget/SKILL.md .claude/skills/creating-widget/SKILL.md
+diff .agents/skills/creating-widget/SKILL.md .claude/skills/creating-widget/SKILL.md
+```
+
+(Both copies in this repo are byte-identical as of the last commit — verified
+with the `diff` above.)

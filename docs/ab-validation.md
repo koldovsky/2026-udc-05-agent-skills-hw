@@ -3,13 +3,25 @@
 **Skill under test:** `creating-widget`
 **Prompt (same for A and B):** the change request from `materials/ab-task.md`
 (add an `alert` widget), pasted verbatim, not reworded between runs.
-**Tool used:** Claude Code (model: Fable 5). Each run was a **fresh agent
-context** (new chat equivalent); between runs the working tree was reset to
-baseline (`git checkout`-level revert of `app/src`), and for run B the
-`creating-widget` folder was **moved entirely out of the repo**
+**Tool used:** Claude Code (Claude 5 family, session model Fable 5), run date
+2026-08-22. Each run was a **fresh agent context** (new chat equivalent);
+between runs the working tree was reset to baseline (`git checkout`-level
+revert of `app/src`), and for run B the `creating-widget` folder was **moved
+entirely out of the repo**
 (`mv .agents/skills/creating-widget /tmp/skill-disabled/`), not just renamed.
+**Raw evidence:** the exact `git diff` of every run is preserved in
+[`docs/evidence/`](evidence/README.md).
 
-## Result A — skill available
+Two rounds were run: **Round 1** with the initial version of the skill, and
+**Round 2** after upgrading the skill with project-specific knowledge that is
+*not* inferable from the seeded example (a registry-level registration test —
+see Round 2 below for why that matters methodologically).
+
+---
+
+## Round 1 — initial skill
+
+### Result A — skill available
 
 The agent followed the discovery chain `app/AGENTS.md` → `## Skills` →
 `.agents/skills/creating-widget/SKILL.md` and reported explicitly that it
@@ -28,7 +40,7 @@ checklist". Output:
   `npm run typecheck` — the typecheck run came from the skill's `## Verify`
   section.
 
-## Result B — skill removed
+### Result B — skill removed
 
 The agent read `app/AGENTS.md`, tried to follow the Skills pointer, and
 discovered the `creating-widget` folder **did not exist** (it verified with a
@@ -40,7 +52,7 @@ a `diff` of the two patches shows the **only** differences are the sample
 strings inside the tests (`"Saved"` vs `"Heads up"`). It also ran tests
 (4/4 green) and typecheck.
 
-## Difference table
+### Round 1 difference table
 
 | Aspect | A (skill available) | B (skill removed) |
 |---|---|---|
@@ -52,7 +64,7 @@ strings inside the tests (`"Saved"` vs `"Heads up"`). It also ran tests
 | **How the pattern was found** | deterministically: loaded `SKILL.md`, followed its steps + `## Verify` checklist | by inference: hit a dangling skill reference, listed the FS to confirm it was gone, then reverse-engineered `badge/` |
 | Extra verification performed | `npm test` + `npm run typecheck` (prescribed by the skill) | `npm test` + typecheck (agent's own initiative) |
 
-## Conclusion
+### Round 1 conclusion
 
 The skill demonstrably changed the **process**: in run A it was discovered and
 followed as an explicit checklist; in run B the agent noticed its absence and
@@ -60,14 +72,69 @@ had to spend turns inferring the convention from the `badge` example. The
 **outcome**, however, converged — because this repo's baseline is unusually
 strong (a complete `app/AGENTS.md`, a single canonical example widget, and a
 capable model), run B could reconstruct the golden path from examples alone.
-That is itself the honest lesson of the A/B: a skill earns the most in repos
-where the convention is *not* already legible from one obvious example — and
-even in a well-seeded repo it still buys determinism (the prescribed
-`## Verify` steps ran because the skill said so, not because the model felt
-like it) and removes the token/turn cost of re-deriving the pattern each time.
 Known confound: both runs could see the repo-level `AGENTS.md`, which names
 `badge/` as "the pattern" — removing the skill does not remove all guidance,
 matching the walkthrough's setup where only the skill folder is moved.
 
-The skill-assisted (run A) result is kept as the real commit;
-`cd app && npm test` is green (4/4).
+On efficiency, the measured numbers were a wash at n=1 — run A: 28,430 tokens
+/ 13 tool calls / 73 s; run B: 29,116 tokens / 12 tool calls / 76 s — well
+inside run-to-run noise, so no efficiency claim is made from this data.
+
+---
+
+## Round 2 — upgraded skill (knowledge the example can't teach)
+
+Round 1 exposed a design weakness in the experiment itself: when everything
+the skill teaches is also legible from the seeded `badge/` example, a capable
+agent reconstructs it and the arms converge. So the skill was upgraded with a
+piece of real, verified project knowledge that exists **nowhere in the seeded
+code**: colocated widget tests import the factory directly, so the entire
+suite stays green even when a widget is never registered (verified: with the
+`alert` import deleted from `widgets/index.ts`, `npm test` passed 4/4 and
+typecheck was clean while `create("alert", …)` would throw at runtime). The
+upgraded skill's step 4 closes that hole by requiring a registry-level case in
+`app/src/widgets/registration.test.ts`.
+
+Both arms were re-run from the same badge-only baseline (no `alert`, no
+`registration.test.ts`), same verbatim prompt, fresh contexts; for arm B the
+skill was moved out of **both** `.agents/skills/` and the `.claude/skills/`
+mirror.
+
+### Result A₂ — upgraded skill available
+
+Golden path as before, **plus** it created `registration.test.ts` with
+registry-level cases (`listWidgets()` containment + `create()` output) for
+both `alert` and `badge`, citing the skill as the reason. `npm test` 6/6
+green, typecheck clean.
+
+### Result B₂ — skill removed
+
+Golden path faithfully reproduced — its `alert.ts`/`alert.test.ts`/`index.ts`
+came out byte-identical to the committed skill-assisted versions (its diff vs
+the commit is empty, see `docs/evidence/run-b2.patch`) — but **no
+`registration.test.ts`**: the file appears nowhere in its output or its
+report. `npm test` 4/4 green (which is exactly the problem: green while the
+registration gap stays open).
+
+### Round 2 difference table
+
+| Aspect | A₂ (upgraded skill) | B₂ (skill removed) |
+|---|---|---|
+| Golden path (folder, factory, `register()`, colocated test, `index.ts`) | yes | yes |
+| Registry-level `registration.test.ts` | **yes — created, covers alert + badge** | **no — structurally unreachable: nothing in `badge/` to mirror it from** |
+| Would a forgotten `widgets/index.ts` import be caught by tests? | yes (fails with `expected [ 'badge' ] to include 'alert'` — verified) | no (suite stays green — verified) |
+
+## Overall conclusion
+
+Round 1 shows what a skill does when it merely restates a legible convention:
+it changes the *process* (deterministic discovery, prescribed verification)
+but a strong baseline lets the no-skill arm converge on the same code. Round 2
+shows what a skill does when it encodes knowledge the codebase cannot teach by
+example: the no-skill arm cannot produce it at all. The practical rule this
+A/B demonstrates: **a skill earns its keep in proportion to how much of it is
+NOT already derivable from the repo's own examples** — and the registration
+test is now part of the skill precisely because it fails that derivability
+test.
+
+The skill-assisted results are kept as the real commit (`alert` widget +
+`registration.test.ts`); `cd app && npm test` is green (3 files, 6/6).

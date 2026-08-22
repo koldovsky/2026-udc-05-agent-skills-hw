@@ -1,0 +1,54 @@
+diff --git a/app/src/widgets/alert/alert.test.ts b/app/src/widgets/alert/alert.test.ts
+new file mode 100644
+index 0000000..a60990d
+--- /dev/null
++++ b/app/src/widgets/alert/alert.test.ts
+@@ -0,0 +1,16 @@
++import { describe, expect, it } from "vitest";
++import { createAlert } from "./alert.js";
++
++describe("createAlert", () => {
++  it("defaults to the info tone", () => {
++    expect(createAlert({ message: "Heads up" })).toBe(
++      '<div class="alert alert--info">Heads up</div>',
++    );
++  });
++
++  it("respects an explicit tone", () => {
++    expect(createAlert({ message: "Something broke", tone: "error" })).toBe(
++      '<div class="alert alert--error">Something broke</div>',
++    );
++  });
++});
+\ No newline at end of file
+diff --git a/app/src/widgets/alert/alert.ts b/app/src/widgets/alert/alert.ts
+new file mode 100644
+index 0000000..cebc746
+--- /dev/null
++++ b/app/src/widgets/alert/alert.ts
+@@ -0,0 +1,13 @@
++import { register, type WidgetProps } from "../../core/registry.js";
++
++export interface AlertProps extends WidgetProps {
++  message: string;
++  tone?: "info" | "warn" | "error";
++}
++
++export function createAlert(props: AlertProps): string {
++  const tone = props.tone ?? "info";
++  return `<div class="alert alert--${tone}">${props.message}</div>`;
++}
++
++register("alert", createAlert);
+\ No newline at end of file
+diff --git a/app/src/widgets/index.ts b/app/src/widgets/index.ts
+index 578c6b5..8123261 100644
+--- a/app/src/widgets/index.ts
++++ b/app/src/widgets/index.ts
+@@ -1,5 +1,6 @@
+ // Import every widget module so its register() call runs — this is the
+ // bundle entry point's dependency root for the bundle-size exercise.
++import "./alert/alert.js";
+ import "./badge/badge.js";
+ 
+ export { listWidgets, create } from "../core/registry.js";

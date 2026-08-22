@@ -38,12 +38,15 @@ entry point is `src/index.ts`.
 
 ## Skills
 
-Reusable agent skills for this repo live in `../.agents/skills/` (repo root).
-Read the matching `SKILL.md` before doing the corresponding kind of work:
+Reusable agent skills for this repo live in `.agents/skills/` at the repo
+root (one level above this file). Read the matching `SKILL.md` before doing
+the corresponding kind of work:
 
 - `creating-widget` (`.agents/skills/creating-widget/SKILL.md`) — the golden
   path for adding a **new widget**: folder layout, pure factory + `register()`
-  call, colocated vitest test, wiring into `src/widgets/index.ts`. Load it
+  call, colocated vitest test, a registry-level case in
+  `src/widgets/registration.test.ts` (the only test that catches a forgotten
+  `widgets/index.ts` import), and wiring into `src/widgets/index.ts`. Load it
   whenever asked to add a new widget/component.
 - `architecture-deep-dive` (`.agents/skills/architecture-deep-dive/SKILL.md`)
   — explains the registry architecture, module boundaries, and where new

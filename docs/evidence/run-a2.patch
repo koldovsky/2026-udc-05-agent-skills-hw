@@ -1,0 +1,51 @@
+diff --git a/app/src/widgets/alert/alert.test.ts b/app/src/widgets/alert/alert.test.ts
+index d1b2112..f51a72f 100644
+--- a/app/src/widgets/alert/alert.test.ts
++++ b/app/src/widgets/alert/alert.test.ts
+@@ -7,8 +7,8 @@ describe("createAlert", () => {
+   });
+ 
+   it("respects an explicit tone", () => {
+-    expect(createAlert({ message: "Something failed", tone: "error" })).toBe(
+-      '<div class="alert alert--error">Something failed</div>',
++    expect(createAlert({ message: "Disk full", tone: "error" })).toBe(
++      '<div class="alert alert--error">Disk full</div>',
+     );
+   });
+ });
+\ No newline at end of file
+diff --git a/app/src/widgets/index.ts b/app/src/widgets/index.ts
+index 8123261..b201b2e 100644
+--- a/app/src/widgets/index.ts
++++ b/app/src/widgets/index.ts
+@@ -1,6 +1,6 @@
+ // Import every widget module so its register() call runs — this is the
+ // bundle entry point's dependency root for the bundle-size exercise.
+-import "./alert/alert.js";
+ import "./badge/badge.js";
++import "./alert/alert.js";
+ 
+ export { listWidgets, create } from "../core/registry.js";
+diff --git a/app/src/widgets/registration.test.ts b/app/src/widgets/registration.test.ts
+new file mode 100644
+index 0000000..49e9a77
+--- /dev/null
++++ b/app/src/widgets/registration.test.ts
+@@ -0,0 +1,16 @@
++import { describe, expect, it } from "vitest";
++import { create, listWidgets } from "./index.js";
++
++describe("widget registration", () => {
++  it("registers badge so it is reachable by name", () => {
++    expect(listWidgets()).toContain("badge");
++    expect(create("badge", { label: "New" })).toBe('<span class="badge badge--info">New</span>');
++  });
++
++  it("registers alert so it is reachable by name", () => {
++    expect(listWidgets()).toContain("alert");
++    expect(create("alert", { message: "Saved" })).toBe(
++      '<div class="alert alert--info">Saved</div>',
++    );
++  });
++});
+\ No newline at end of file
