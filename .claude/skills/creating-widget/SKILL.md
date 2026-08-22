@@ -1,9 +1,26 @@
 ---
 name: creating-widget
 description: How to add a new widget to this widget-registry library (app/). Use when asked to add/create a new widget or UI component (e.g. "add a spinner widget", "create an alert component") — encodes the project's golden path: folder layout, pure factory, register() call, colocated vitest test, and wiring into widgets/index.ts. Not needed for changes to existing widgets' logic or to the registry core.
+model: claude-haiku-4-5
 ---
 
 # Creating a new widget
+
+## Recommended model
+
+This is a **mechanical, fully-specified task** — the skill supplies the entire
+golden path, so no architectural judgment is needed. Route it to the cheapest
+capable tier:
+
+1. **Preferred:** Claude Haiku (`claude-haiku-4-5`) — fast and cost-effective;
+   following this skill's template is well within its capability.
+2. **Fallback:** Claude Sonnet (`claude-sonnet-5`, or `claude-sonnet-4-6`) if
+   Haiku is unavailable in your tool.
+3. Otherwise any inexpensive model your tool offers.
+
+Do not burn an Opus/Fable-tier model on this — the expertise lives in the
+skill, not the model. (This skill's `model:` frontmatter key mirrors this preference as a machine-readable hint; tools that
+don't support it ignore the key — apply the ladder manually when delegating.)
 
 ## When to use this
 

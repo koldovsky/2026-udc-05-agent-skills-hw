@@ -40,7 +40,12 @@ entry point is `src/index.ts`.
 
 Reusable agent skills for this repo live in `.agents/skills/` at the repo
 root (one level above this file). Read the matching `SKILL.md` before doing
-the corresponding kind of work:
+the corresponding kind of work. Each skill also declares a **recommended
+model tier** (frontmatter `model:` + a "Recommended model" section with a
+fallback ladder) — when delegating skill work to a subagent, pick the model
+accordingly: cheap/fast (Haiku) for `creating-widget`, mid-tier (Sonnet) for
+`analyzing-bundle-size`, highest capability (Fable/Opus) for
+`architecture-deep-dive`.
 
 - `creating-widget` (`.agents/skills/creating-widget/SKILL.md`) — the golden
   path for adding a **new widget**: folder layout, pure factory + `register()`

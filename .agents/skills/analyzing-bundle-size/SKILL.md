@@ -2,9 +2,26 @@
 name: analyzing-bundle-size
 description: Measures the real bundle size of the app/ library by running the actual esbuild build and reading dist/bundle.js from disk. Use when asked how big the bundle is, or to assess the bundle-size impact of a change (e.g. after adding a widget). Never estimate or guess the number — always run the script.
 allowed-tools: Bash, Read
+model: claude-sonnet-5
 ---
 
 # Analyzing bundle size
+
+## Recommended model
+
+**Mid-complexity task**: the script does the measuring, but the agent still
+has to run it correctly, interpret the numbers, compute deltas across
+baselines, and spot anomalies (e.g. the registration-canary case below).
+Route to the balanced mid tier:
+
+1. **Preferred:** Claude Sonnet (`claude-sonnet-5`, or `claude-sonnet-4-6`) —
+   the right speed/intelligence balance for run-and-interpret work.
+2. **Fallback:** step up to Opus-tier only if the analysis turns into a real
+   optimization investigation; step down to Haiku only for a bare "print the
+   current number" ask.
+
+(This skill's `model:` frontmatter key mirrors this preference as a machine-readable hint; tools that don't support it ignore
+the key — apply the ladder manually when delegating.)
 
 ## When to use this
 

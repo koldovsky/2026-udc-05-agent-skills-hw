@@ -1,9 +1,26 @@
 ---
 name: architecture-deep-dive
 description: Explains the architecture of the widget-registry library in app/ — the registry contract, module boundaries, widget conventions, and where new code belongs. Use when asked to explain how this project works, why it is structured this way, or where to implement a new feature. For the concrete steps of adding a widget, use the creating-widget skill instead.
+model: claude-fable-5
 ---
 
 # Architecture deep dive
+
+## Recommended model
+
+Architecture explanation and "where does this feature belong" decisions are
+**judgment-heavy**: they require weighing module boundaries, cross-checking
+claims against real code, and reasoning about design tradeoffs — the kind of
+work where model capability directly changes answer quality. Route to the
+highest-capability tier available:
+
+1. **Preferred:** Claude Fable (`claude-fable-5`) — Anthropic's most capable
+   model, for the most demanding reasoning.
+2. **Fallback:** Claude Opus (`claude-opus-5`, or `claude-opus-4-8`).
+3. Otherwise the strongest model your tool offers for complex tasks.
+
+(This skill's `model:` frontmatter key mirrors this preference as a machine-readable hint; tools that don't support it ignore
+the key — apply the ladder manually when delegating.)
 
 ## When to use this
 
