@@ -36,3 +36,6 @@ nul
 # it's the optional cross-tool skill mirror from Task E.
 .claude/*
 !.claude/skills/
+
+# Local working notes — not part of the homework submission
+/IMPROVEMENTS.md
