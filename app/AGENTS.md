@@ -36,4 +36,21 @@ entry point is `src/index.ts`.
   changes there affect all widgets; keep its public API (`register`, `create`,
   `listWidgets`) stable.
 
-<!-- Task A adds a "## Skills" section here pointing at .agents/skills/ -->
+## Skills
+
+Reusable agent skills for this repo live in `../.agents/skills/` (repo root).
+Read the matching `SKILL.md` before doing the corresponding kind of work:
+
+- `creating-widget` (`.agents/skills/creating-widget/SKILL.md`) — the golden
+  path for adding a **new widget**: folder layout, pure factory + `register()`
+  call, colocated vitest test, wiring into `src/widgets/index.ts`. Load it
+  whenever asked to add a new widget/component.
+- `architecture-deep-dive` (`.agents/skills/architecture-deep-dive/SKILL.md`)
+  — explains the registry architecture, module boundaries, and where new
+  features belong; the depth lives in its `references/architecture.md`. Load
+  it when asked to explain the architecture or decide where to implement
+  something.
+- `analyzing-bundle-size` (`.agents/skills/analyzing-bundle-size/SKILL.md`) —
+  measures the real bundle size via `scripts/measure-bundle.mjs` (runs
+  `npm run build` and reads `dist/bundle.js`). Load it when asked about
+  bundle size or the size impact of a change — never guess the number.
