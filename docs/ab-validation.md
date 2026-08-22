@@ -124,6 +124,36 @@ registration gap stays open).
 | Registry-level `registration.test.ts` | **yes — created, covers alert + badge** | **no — structurally unreachable: nothing in `badge/` to mirror it from** |
 | Would a forgotten `widgets/index.ts` import be caught by tests? | yes (fails with `expected [ 'badge' ] to include 'alert'` — verified) | no (suite stays green — verified) |
 
+## Round 3 — model routing (do the skills pick the correct models?)
+
+After the skills gained per-task model recommendations (`model:` frontmatter
++ a "Recommended model" fallback ladder: Haiku for `creating-widget`, Sonnet
+for `analyzing-bundle-size`, Fable→Opus for `architecture-deep-dive`), a
+third A/B checked whether agents actually route by them. Same verbatim prompt
+in fresh contexts: assign an exact model ID + fallback to one task per skill,
+then disclose sources. Full reports: `docs/evidence/round3-model-routing.md`.
+
+| | A (skills present) | B (folders moved out, git intact) | B′ (clean room: no git, no skills) |
+|---|---|---|---|
+| Correct tiers (Haiku / Fable / Sonnet)? | ✅ all three | ✅ all three | ✅ all three |
+| Exact IDs + full fallback ladders? | ✅ verbatim from SKILL.md | ✅ — **recovered the SKILL.md files from git history** | ⚠️ tiers only, from `app/AGENTS.md`'s summary line; IDs self-supplied, ladders absent |
+| Attributed to project guidance? | yes, per-file | yes (via `git show HEAD:`) | yes (`app/AGENTS.md` "the decisive source") |
+
+Two findings beyond the headline ✅:
+
+1. **Folder-move disabling stops working once skills are committed.** Run B's
+   agent noticed the empty `.agents/skills/`, pulled all three SKILL.md files
+   out of git history, and followed them anyway. The walkthrough's
+   disable-by-moving technique was valid in rounds 1–2 only because the skill
+   wasn't committed yet; a future A/B on committed skills needs a baseline
+   commit (or a `.git`-less copy) instead.
+2. **The behavioral delta vs. no guidance is real.** The clean-room agent
+   disclosed unprompted that its unaided instinct "would have swapped tasks 1
+   and 3 (Sonnet for the coding task, Haiku for the mechanical measurement)"
+   — the project mapping overrode it. Without any guidance the routing would
+   have contradicted the project's intent, which is exactly what the skill
+   recommendations exist to prevent.
+
 ## Overall conclusion
 
 Round 1 shows what a skill does when it merely restates a legible convention:
