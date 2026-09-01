@@ -46,8 +46,9 @@ Golden path for a widget named `<name>` (kebab-case, e.g. `alert`), factory
    ```
 
    Rules:
-   - Relative import ends with `.js` (ESM/NodeNext resolution), even though
-     the source file is `.ts`.
+   - Relative import ends with `.js`, even though the source file is `.ts`
+     — `tsconfig` uses `moduleResolution: "Bundler"` so it is not enforced,
+     but every existing file in `src/` does it. Match the convention.
    - Props interface **extends `WidgetProps`** and is exported.
    - Named exports only — no `default export`.
    - The factory is pure: no DOM, no `document`, no I/O, no state. The only
