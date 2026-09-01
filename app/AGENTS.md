@@ -36,4 +36,14 @@ entry point is `src/index.ts`.
   changes there affect all widgets; keep its public API (`register`, `create`,
   `listWidgets`) stable.
 
-<!-- Task A adds a "## Skills" section here pointing at .agents/skills/ -->
+## Skills
+
+Project-specific Agent Skills live in `.agents/skills/` (repo root). Load the
+matching `SKILL.md` before working on the tasks below.
+
+| Skill | Path | Use it when |
+|---|---|---|
+| `creating-widget` | `.agents/skills/creating-widget/SKILL.md` | Adding, renaming, or removing a widget — encodes the golden path: `src/widgets/<name>/<name>.ts` (pure factory + `register()`), colocated `<name>.test.ts`, `import "./<name>/<name>.js";` in `src/widgets/index.ts`. |
+| `architecture-deep-dive` | `.agents/skills/architecture-deep-dive/SKILL.md` (+ `references/architecture.md`) | Explaining how the registry/widget layers fit together, or deciding where a new feature belongs. Depth lives in the reference file, loaded only on demand. |
+| `analyzing-bundle-size` | `.agents/skills/analyzing-bundle-size/SKILL.md` (+ `scripts/measure-bundle.mjs`) | Reporting the current bundle weight or the bundle-size impact of a change — the script runs `npm run build` and reads the real minified/gzipped byte size of `dist/bundle.js` instead of guessing. |
+
