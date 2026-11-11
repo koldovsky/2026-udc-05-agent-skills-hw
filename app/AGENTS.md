@@ -36,4 +36,8 @@ entry point is `src/index.ts`.
   changes there affect all widgets; keep its public API (`register`, `create`,
   `listWidgets`) stable.
 
-<!-- Task A adds a "## Skills" section here pointing at .agents/skills/ -->
+## Skills
+
+Agent Skills live in `.agents/skills/` at the repo root:
+
+- `.agents/skills/creating-widget/`: the golden path for adding a new widget (factory module with `register()`, colocated vitest test, and an import in `src/widgets/index.ts`).
