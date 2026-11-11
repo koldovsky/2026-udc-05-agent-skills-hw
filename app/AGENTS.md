@@ -42,3 +42,4 @@ Agent Skills live in `.agents/skills/` at the repo root:
 
 - `.agents/skills/creating-widget/`: the golden path for adding a new widget (factory module with `register()`, colocated vitest test, and an import in `src/widgets/index.ts`).
 - `.agents/skills/architecture-deep-dive/`: explains how the registry, widget self-registration, and the esbuild build fit together, and where a change should go (depth in `references/architecture.md`).
+- `.agents/skills/analyzing-bundle-size/`: measures the real size of `dist/bundle.js` by running `npm run build` via `scripts/measure-bundle.mjs` — never estimate; measure before and after a change to compare.
